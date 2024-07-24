@@ -1,0 +1,106 @@
+:root{
+    /* WHITE */
+    --white1: #ffffff;
+    --white2: #FCFCFD;
+    --white3: #F8F9FB;
+    --white4: #F1F3F6;
+    
+
+    /* BLACK */
+    --black1: #0D0D0E;
+    --black2: #1C1C20;
+    --black3: #23232A;
+    --black4: #31313B;
+    --black5: #42424D;
+    --black6: #50505D;
+    --black7: #676A7B;
+    --black8: #737885;
+
+
+
+    /* GREY */
+    --grey1: #A4A7B0;
+    --grey2: #B3B6BE;
+    --grey3: #C5C8D0;
+    --grey4: #CED0D4;
+    --grey5: #DFE0E2;
+
+
+    /* MINT */
+    --mint1: #68D0CA;
+    --mint2: #4ECBC3;
+
+
+    /* RED */
+    --red1: #FF576B;
+    --red2: #FFF4F4;
+
+
+    /* BLUE */
+    --blue1: #0055A8;
+    --blue2: #3380CB;
+    --blue3: #51A9FF;
+    --blue4: #A8D4FF;
+
+
+    /* GREEN */
+    --green1: #00A855;
+    --green2: #00FF82;
+    --green3: #51FFA9;
+    --green4: #A8FFD4;
+
+
+    /* YELLOW */
+    --yellow1: #FEA837;
+    --yellow2: #FFD273;
+
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../fonts/Montserrat-Regular.ttf') format('ttf');
+    font-weight: 400; /* Regular */
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../fonts/Montserrat-Medium.ttf') format('ttf');
+    font-weight: 500; /* Regular */
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../fonts/Montserrat-SemiBold.ttf') format('ttf');
+    font-weight: 600; /* Regular */
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../fonts/Montserrat-Bold.ttf') format('ttf');
+    font-weight: 700; /* Regular */
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../fonts/Montserrat-Bold.ttf') format('ttf');
+    font-weight: 800; /* Regular */
+    font-style: normal;
+}
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 400;
+}
+html{
+    /* font-family: Comic Arial, Helvetica; */
+}
+.ic-22{
+    width: 22px;
+    height: 22px;
+}
+
+.ic-18 {
+    width: 18px;
+    height: 18px;
+}
