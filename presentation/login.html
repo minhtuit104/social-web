@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../assets/css/login.css">
+    <title>Login</title>
+</head>
+<body>
+    <div id="wrapper">
+        <h2>Welcome</h2>
+        <form action="#">
+            <div class="input-field">
+                <input type="text" id="username" placeholder="Enter email or phone number" required>
+                <img src="../assets/image/icons/ic_user.svg" class="ic-18 ic-user">
+            </div>
+            <div class="input-field">
+                <input type="password" id="input-pass" placeholder="Password" required>
+                <img src="../assets/image/icons/ic_eye.svg" class="ic-18 ic-eye" id="show-pass">
+            </div>
+            <a href="#" class="forgot">
+                <p>Forgot password?</p>
+            </a>
+            <button type="submit" class="login">Login</button>
+            <p>Don't have an account? <a href="#" class="sing-up">sing up</a></p>
+        </form>
+    </div>
+
+    <script>
+        const inputPass = document.querySelector("#input-pass")
+        const btnShowPass = document.querySelector("#show-pass")
+
+        btnShowPass.addEventListener('click', function(){
+            if(inputPass.type == "password"){
+                inputPass.type = "text";
+            }else{
+                inputPass.type = "password";
+            }
+        })
+    </script>
+</body>
+</html>

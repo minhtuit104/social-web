@@ -3,17 +3,19 @@
 
     <div id="nav-side-bar">
         <div class="profile">
-            <img src="/assets/image/tu.jpg" alt="Profile Image" class="profile-image">
+            <div class="profile-image">
+                <img src="/assets/image/tu.jpg" alt="Profile Image">
+            </div>
             <h3>Tạ Minh Tú</h3>
             <p>@taminhtu1004</p>
         </div>
         <nav>
             <ul>
-                <li><a href="#"><img src="../../assets/image/icons/ic_news.svg" class="ic-22">Feed</a></li>
-                <li><a href="#"><img src="../../assets/image/icons/ic_message.svg" class="ic-22">Messages</a></li>
-                <li><a href="#"><img src="../../assets/image/icons/ic_friends.svg" class="ic-22">Friends</a></li>
-                <li><a href="#"><img src="../../assets/image/icons/ic_notifications.svg" class="ic-22">Notifications</a></li>
-                <li><a href="#"><img src="../../assets/image/icons/ic_setting.svg" class="ic-22">Settings</a></li>
+                <li><a href="new_feed_page.html"><img src="../../assets/image/icons/ic_news.svg" class="ic-22">News Feed</a></li>
+                <li><a href="message.html"><img src="../../assets/image/icons/ic_message.svg" class="ic-22">Messages</a><span class="quantity">9</span></li>
+                <li><a href="friends.html"><img src="../../assets/image/icons/ic_friends.svg" class="ic-22">Friends</a><span class="quantity">9</span></li>
+                <li><a href="notifications.html"><img src="../../assets/image/icons/ic_notifications.svg" class="ic-22">Notifications</a><span class="quantity">9</span></li>
+                <li><a href="settings.html"><img src="../../assets/image/icons/ic_setting.svg" class="ic-22">Settings</a></li>
             </ul>
         </nav>  
                      
@@ -38,7 +40,15 @@
                     <input type="text" placeholder="What's on your mind?">
                 </div>
                 <div class="post-actions">
-                    <button><img src="../../assets/image/icons/ic_global.svg" class="ic-18">Publish<img src="../../assets/image/icons/ic_arrorw-dow.svg" class="list"></button>
+                    <div class="privacy-down">
+                        <button onclick="toggleDropdown()" class="publish-btn" id="publishBtn">
+                            <img src="../../assets/image/icons/ic_global.svg" class="ic-18">Publish<img src="../../assets/image/icons/ic_arrorw-dow.svg" class="list">
+                        </button>
+                        <div id="myPrivacydown" class="friends-btn">
+                            <button onclick="selectOption('publish')" class="optionpublish"><img src="../../assets/image/icons/ic_global.svg" class="ic-18">Publish</button>
+                            <button onclick="selectOption('friends')" class="optionfriends"><img src="../../assets/image/icons/ic_friends.svg" class="ic-18">Friends</button>
+                        </div>
+                    </div>
                     <button><img src="../../assets/image/icons/ic_library.svg" class="ic-18">Image</button>
                 </div>
             </div>
@@ -47,59 +57,65 @@
                 <div class="post">
                     <div class="post-header">
                         <div class="nav-post">
-                            <img src="/assets/image/tu.jpg" alt="Profile Image" class="post-profile-image">
+                            <img src="/assets/image/anh4.jpg" alt="Profile Image" class="post-profile-image">
                             <div class="post-info">
-                                <h3>Tạ Minh Tú</h3>
-                                <p>2 minutes ago</p>
+                                <h3>Minh Tú</h3>
+                                <p>2 minutes ago<img src="../../assets/image/icons/ic_global.svg" class="ic-18 time-privacy"></p>
                             </div>
                         </div>
                         
-
-
-
-                        
-                        <img src="/assets/image/icons/ic_three-dot.svg" alt="" class="ic-22" >
+                        <div class="menu-items">
+                            <button onclick="menuDropdown()" class="three-dot-btn">
+                                <img src="/assets/image/icons/ic_three-dot.svg" alt="Menu" class="ic-22" >
+                            </button>
+                            <div id="myMenuDropdown" class="menu-content">
+                                <button class="menu-post-btn">
+                                    <img src="../../assets/image/icons/ic_bookmark.svg" alt="" class="ic-18">
+                                    <div class="options">
+                                        <div>Save</div>
+                                        <p>Add this to your saved items.</p>
+                                    </div>
+                                </button>
+                                <button class="menu-post-btn">
+                                    <img src="../../assets/image/icons/ic_hide.svg" alt="" class="ic-18">
+                                    <div class="options">
+                                        <div>Hide</div>
+                                        <p>Hide this from your news feed.</p>
+                                    </div>
+                                </button>
+                                <button class="menu-post-btn">
+                                    <img src="../../assets/image/icons/ic_report.svg" alt="" class="ic-18">
+                                    <div class="options">
+                                        <div>Report</div>
+                                        <p>We won't let Minh Tú know who reported this.</p>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     <p>This is the most beautiful place I've ever been. I wish I would come back here to be able to discover more interesting things.</p>
                     <div class="post-images">
                         <img src="/assets/image/anh1.jpg" alt="Post Image" class="image">
                         <img src="/assets/image/anh2.jpeg" alt="Post Image" class="image">
                         <img src="/assets/image/anh3.jpeg" alt="Post Image" class="image">                        
+                        <img src="/assets/image/anh4.jpg" alt="Post Image" class="image">                        
+                        <img src="/assets/image/anh1.jpg" alt="Post Image" class="image">                        
                     </div>
                     <div class="post-footer">
                         <div class="like-comment">
-                            <img src="../../assets/image/icons/ic_like-fillsvg.svg" class="ic-like-comment">
-                            <p>100</p>
-                            <img src="../../assets/image/icons/ic_comment.svg" class="ic-like-comment">
-                            <p>18</p>
-                        </div>
-                        <div class="share">
-                            <img src="../../assets/image/icons/ic_share.svg" alt="" class="ic-share">
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="post">
-                    <div class="post-header">
-                        <div class="nav-post">
-                            <img src="/assets/image/luan.jpg" alt="Profile Image" class="post-profile-image">
-                            <div class="post-info">
-                                <h3>Nguyễn Thành Luân</h3>
-                                <p>5 minutes ago</p>
+                            <div class="main-reaction">
+                                <img src="../../assets/image/icons/ic_like-fillsvg.svg" class="ic-like-comment" id="mainReaction">
+                                <p class="feelingCount">100</p>
+                                <div class="feeling-options" id="feelingOptions">
+                                    <img src="../../assets/image/icons/ic_like-fillsvg.svg" alt="Like" class="feeling-icon" data-reaction="like-fillsvg">
+                                    <img src="../../assets/image/icons/ic_love.svg" alt="Love" class="feeling-icon" data-reaction="love">
+                                    <img src="../../assets/image/icons/ic_haha.svg" alt="Haha" class="feeling-icon" data-reaction="haha">
+                                    <img src="../../assets/image/icons/ic_wow.svg" alt="Wow" class="feeling-icon" data-reaction="wow">
+                                    <img src="../../assets/image/icons/ic_sad.svg" alt="Sad" class="feeling-icon" data-reaction="sad">
+                                    <img src="../../assets/image/icons/ic_angry.svg" alt="Angry" class="feeling-icon" data-reaction="angry">
+                                </div>
                             </div>
-                        </div>                       
-                        <img src="/assets/image/icons/ic_three-dot.svg" alt="" class="ic-22" >
-                    </div>
-                    <p>This is the most beautiful place I've ever been. I love you</p>
-                    <div class="post-images">
-                        <img src="/assets/image/luan.jpg" alt="Post Image" class="image">
-                        <img src="/assets/image/luan.jpg" alt="Post Image" class="image">
-                    </div>
-                    <div class="post-footer">
-                        <div class="like-comment">
-                            <img src="../../assets/image/icons/ic_like-fillsvg.svg" class="ic-like-comment">
-                            <p>100</p>
-                            <img src="../../assets/image/icons/ic_comment.svg" class="ic-like-comment">
+                            <button class="comment-btn js-comment-btn"><img src="../../assets/image/icons/ic_comment.svg" alt="comment" class="ic-like-comment"></button>
                             <p>18</p>
                         </div>
                         <div class="share">
@@ -116,11 +132,47 @@
     <div id="nav-stories">
         <div class="right-sidebar">
             <div class="stories">
-                <h3>Stories</h3>
-                <div class="story"></div>
-                <div class="story"></div>
-                <div class="story"></div>
+                <div class="stories-header">
+                    <h3>Stories</h3>
+                </div>
+                <div class="stories-body">
+                    <div class="story-item create">
+                        <div class="create-story">
+                            <div class="ic-create-str">
+                                <img src="../../assets/image/icons/ic_plus.svg" alt="create" class="ic-22">
+                            </div>
+                            <div class="document">
+                                Create story
+                            </div>
+                        </div>
+                    </div>
+                    <div class="story-item">
+                        <img src="../../assets/image/tmtu.png" alt="story-img">
+                        <div class="story-info">
+                            <img src="../../assets/image/tu.jpg" alt="taminhtu">
+                            <span>Tạ Minh Tú</span>
+                        </div>
+                    </div>
+                    <div class="story-item">
+                        <img src="../../assets/image/tcdoan.png" alt="story-img">
+                        <div class="story-info">
+                            <img src="../../assets/image/doan.jpg" alt="taminhtu">
+                            <span>Trần Công Đoàn</span>
+                        </div>
+                    </div>
+                    <div class="story-item">
+                        <img src="../../assets/image/luan.jpg" alt="story-img">
+                        <div class="story-info">
+                            <img src="../../assets/image/luan1.jpg" alt="taminhtu">
+                            <span>Nguyễn Thành Luân</span>
+                        </div>
+                    </div>
+                    <div class="arrow-right">
+                        <img src="../../assets/image/icons/ic_arrow-right.svg" alt="Next" class="ic-18">
+                    </div>
+                </div>
             </div>
+
             <div class="contacts">
                 <h3>Contacts</h3>
                 <ul>
@@ -129,6 +181,7 @@
                     <li><a href="#"><img src="../../assets/image/luan.jpg" class="img-contact">Nguyễn Thành Luân</a></li>
                 </ul>
             </div>
+
             <div class="groups">
                 <h3>Group conversations</h3>
                 <div class="group">
@@ -141,3 +194,238 @@
         </div>
     </div>
 </div>
+
+<div class="modal js-modal">
+    <div class="modal-container js-modal-container">
+        <div class="close js-close">
+            <img src="../../assets/image/icons/ic_close.svg" alt="close">
+        </div>
+        <div class="modal-header">
+            <p>2 comment</p>
+        </div>
+        <div class="modal-line"></div>
+        <div class="modal-body">
+            <div class="comment-parent">
+                <div class="comment-parent-header">
+                    <img src="../../assets/image/tu.jpg" alt="Tu">
+                    <div class="comment-info">
+                        <h3>Minh Tú</h3>
+                        <h5>2 minutes ago</h5>
+                    </div>
+                </div>
+                <div class="comment-content">
+                    <p>Great. Remember invite me in the next time. We'll travel around the world together. I hope we'll have the happy trip.</p>
+                </div>
+                <div class="comment-footer">
+                    <span>Like</span>
+                    <span>Reply</span>
+                </div>                
+            </div>
+
+            <div class="comment-child">
+                <div class="comment-child-header">
+                    <img src="../../assets/image/luan.jpg" alt="Luan">
+                    <div class="comment-info">
+                        <h3>Thành Luân</h3>
+                        <h5>1 minutes ago</h5>
+                    </div>
+                </div>
+                <div class="comment-content">
+                    <p>I want to go alone to avoid my wife</p>                
+                </div>
+                <div class="comment-footer">
+                    <span>Like</span>
+                    <span>Reply</span>
+                </div>                
+            </div>
+        </div>
+        <div class="modal-footer">
+            <img src="../../assets/image/tu.jpg" alt="Tu" class="modal-footer-image">
+            <div class="modal-footer-input">
+                <input type="text" class="input" placeholder="Comment as Minh Tú">
+                <button class="send-btn">
+                    <img src="../../assets/image/icons/ic_send.svg" class="ic-22" alt="Send">
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<!--js trong phần nav-bar khi mà ở trang nào thì sẽ hiện xanh ở phần đó-->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    var currentPath = window.location.pathname;
+    var navLinks = document.querySelectorAll('nav ul li a');
+
+    navLinks.forEach(function(link) {
+        if (link.getAttribute('href') === currentPath.split('/').pop()) {
+            link.parentElement.classList.add('active');
+        }
+    });
+});
+</script>
+
+<!--js ấn vào arrow-right thì story sẽ cuộn sang phải-->
+<script>
+    document.querySelector('.arrow-right').addEventListener('click', function() {
+    document.querySelector('.stories-body').scrollBy({
+        left: 150,
+        behavior: 'smooth'
+    });
+});
+
+</script>
+
+<!--đoạn mã js giúp đóng mở quyển riêng tư và phần report-->
+<script>
+    //hàm đóng mở privacy
+    function toggleDropdown() {
+        document.getElementById("myPrivacydown").classList.toggle("showmenu");
+    }
+    function selectOption(option) {
+            var publishBtn = document.getElementById('publishBtn');
+            if (option === 'publish') {
+                publishBtn.innerHTML = '<img src="../../assets/image/icons/ic_global.svg" class="ic-18">Publish<img src="../../assets/image/icons/ic_arrorw-dow.svg" class="list">';
+            } else if (option === 'friends') {
+                publishBtn.innerHTML = '<img src="../../assets/image/icons/ic_friends.svg" class="ic-18">Friends<img src="../../assets/image/icons/ic_arrorw-dow.svg" class="list">';
+            }
+            document.getElementById("myPrivacydown").classList.remove("showmenu");
+        }
+
+    //hàm đóng mở save,hide,report
+    function menuDropdown() {
+        document.getElementById("myMenuDropdown").classList.toggle("showmenu");
+    }
+
+
+    // Đóng menu thả xuống nếu người dùng nhấp ra ngoài
+    const menuContent = document.querySelector('.menu-content')
+    menuContent.addEventListener('click', function(event){
+        event.stopPropagation()
+    })
+    window.onclick = function(event) {
+        if (!event.target.matches('.publish-btn') && !event.target.closest('.publish-btn')) {
+            var dropdowns = document.getElementsByClassName("friends-btn");
+            for (var i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('showmenu')) {
+                    openDropdown.classList.remove('showmenu');
+                }
+            }
+        }
+
+        if (!event.target.matches('.three-dot-btn') && !event.target.closest('.three-dot-btn')) {
+            var menudowns = document.getElementsByClassName("menu-content");
+            for (var i = 0; i < menudowns.length; i++) {
+                var openMenudown = menudowns[i];
+                if (openMenudown.classList.contains('showmenu')) {
+                    console.log('Hiding menu-content');
+                    openMenudown.classList.remove('showmenu');
+                }
+            }
+        }
+        
+    }
+
+    //hiển thị tối đa 3 ảnh khi post
+    document.addEventListener("DOMContentLoaded", function() {
+    const posts = document.querySelectorAll('.post');
+
+    posts.forEach(post => {
+        const imagesContainer = post.querySelector('.post-images');
+        const images = imagesContainer.querySelectorAll('.image');
+        const maxImages = 3;
+
+        if (images.length > maxImages) {
+            const extraImages = images.length - maxImages;
+
+            // Lấy đường dẫn của ảnh thứ 4
+            const fourthImageSrc = images[maxImages].src;
+
+            // Ẩn các hình ảnh thừa
+            for (let i = maxImages; i < images.length; i++) {
+                images[i].style.display = 'none';
+            }
+
+            // Tạo và thêm phần tử "+N"
+            const extraImagesElement = document.createElement('div');
+            extraImagesElement.classList.add('extra-images');
+            extraImagesElement.innerText = `+${extraImages}`;
+
+            // Đặt nền cho phần tử "+N" bằng ảnh thứ 4
+            extraImagesElement.style.backgroundImage = `url(${fourthImageSrc})`;
+
+            // Thêm phần tử "+N" vào container
+            imagesContainer.appendChild(extraImagesElement);
+        }
+    });
+
+
+});
+
+</script>
+
+<!--js hiển thị các biểu tượng cảm xúc-->
+<script>
+    const feelingIcons = document.querySelectorAll('.feeling-icon')
+    const mainReaction = document.querySelector('.main-reaction')
+    const feelingOptions = document.querySelector('.feeling-options')
+    const mainReactionImg = document.getElementById('mainReaction')
+    const feelingCount = document.querySelector('.feelingCount')
+
+        mainReaction.addEventListener('mouseover', function() {
+            feelingOptions.style.display = 'flex';
+        });
+
+        mainReaction.addEventListener('mouseout', function() {
+            setTimeout(function() {
+                feelingOptions.style.display = 'none';
+            }, 26666666666666666); // Delay để tránh việc menu biến mất ngay lập tức khi di chuột ra
+        });
+
+        feelingOptions.addEventListener('mouseover', function() {
+            feelingOptions.style.display = 'block';
+        });
+
+        feelingOptions.addEventListener('mouseout', function() {
+            feelingOptions.style.display = 'none';
+        });
+
+        feelingIcons.forEach(function(icon) {
+            icon.addEventListener('click', function() {
+                var reactionType = this.getAttribute('data-reaction');
+                mainReactionImg.src = '../../assets/image/icons/ic_' + reactionType + '.svg'// Thay đổi icon chính
+                feelingOptions.style.display = 'none'; // Ẩn các biểu tượng cảm xúc sau khi chọn
+                feelingCount.textContent = parseInt(feelingCount.textContent) + 1;  
+            });
+        });
+
+</script>
+
+<!--đoạn js giúp hiển thị modal comment-->
+<script>
+    const clickComment = document.querySelector('.js-comment-btn')
+    const modal = document.querySelector('.js-modal')
+    const modalContainer = document.querySelector('.js-modal-container')
+    const modalClose = document.querySelector('.js-close')
+
+    //hàm hiển thị modalComment
+    function showComment(){
+        modal.classList.add('open')
+    }
+    //hàm đóng modalComment
+    function hideComment() {
+        modal.classList.remove('open')
+    }
+
+    clickComment.addEventListener('click', showComment)
+    modalClose.addEventListener('click', hideComment)
+    modal.addEventListener('click', hideComment)
+    modalContainer.addEventListener('click', function(event){
+        event.stopPropagation()
+    })
+</script>
