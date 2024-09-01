@@ -1,0 +1,32 @@
+@import url(./styles.css);
+
+.main-content .nav-content-top{
+    padding: 45px 0 19px 0;
+}
+
+.nav-content-top .nav-bar{
+    display: inline-block;
+}
+.nav-content-top .feeds {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--black1);
+}
+
+.nav-content-top .search-btn{
+    display: flex;
+    float: right;
+    align-items: center;
+    margin-top: 8px;
+}
+.nav-content-top .search-btn .sp-popular{
+    margin-right: 9px;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--black1);
+}
+.nav-content-top .search-btn .sp-friends{
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--black8);
+}

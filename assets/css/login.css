@@ -20,7 +20,7 @@ body{
     border-radius: 12px;
     padding: 10px 20px;
     background: transparent;
-    backdrop-filter: blur(6px);
+    /* backdrop-filter: blur(6px); */
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.4);
 }
 
@@ -44,7 +44,7 @@ body{
     width: 300px;
     height: 3px;
     padding: 20px 40px 20px 20px;
-    backdrop-filter: blur(15px);    
+    /* backdrop-filter: blur(15px);     */
 }
 .input-field img{
     position: absolute;
