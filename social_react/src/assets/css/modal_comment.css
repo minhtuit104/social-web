@@ -1,0 +1,91 @@
+@import url(./styles.css);
+
+.modal-body .comment-parent .comment-parent-header{
+    display: flex;
+}
+.modal-body .comment-parent .comment-parent-header img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;  
+}
+.modal-body .comment-info h3{
+    margin-bottom: 6px;
+    font-size: 16px;
+    font-weight: 700;
+}
+.modal-body .comment-info h5{
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 19.5px;
+    color: var(--black8);
+}
+.modal-body .comment-parent .comment-content{
+    margin: 8px 0 8px 66px;
+}
+.modal-body .comment-content p{
+    font-size: 16px;
+    line-height: 1.4;
+    font-weight: 400;
+}
+.modal-body .comment-child,
+.modal-body .comment-parent .comment-footer{
+    margin-left: 66px;
+}
+.modal-body .comment-footer span{
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--black7);
+    margin-right: 8px;
+    cursor: pointer;
+}
+.modal-body .comment-child .comment-child-header{
+    display: flex;
+    margin-top: 20px;
+}
+.modal-body .comment-child .comment-child-header img{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+.modal-body .comment-child .comment-content{
+    margin: 8px 0 8px 48px;
+}
+.modal-body .comment-child .comment-footer {
+    margin-left: 48px;
+}
+
+.modal-footer{
+    position: relative;
+    bottom: 0;
+    margin-bottom: 10px;
+    justify-content: flex-start !important;
+}
+.modal-footer .modal-footer-image{
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+    border-radius: 50%;
+}
+.modal-footer .modal-footer-input{
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+.modal-footer .input{
+    border: none;
+    outline: none;
+    background: var(--white4);
+    width: 680px;
+    padding: 15px;
+    font-size: 14px;
+    border-radius: 10px;
+}
+.modal-footer-input .send-btn{
+    position: absolute;
+    right: 0;
+    border: none;
+    margin-right: 5px;
+    cursor: pointer;
+}

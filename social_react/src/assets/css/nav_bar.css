@@ -1,0 +1,124 @@
+.nav-side-bar{
+    width: 20%;
+    position: sticky;
+    top: 0;
+}
+.nav-side-bar .profile {
+    text-align: center;
+    padding: 45px 37px 0 38px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.nav-side-bar .profile > .profile-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.nav-side-bar .profile .profile-image img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.nav-side-bar .profile h3 {
+    font-size: 22px;
+    color: var(--black1);
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.nav-side-bar .profile p {
+    font-size: 15px;
+    color: var(--black8);
+    font-weight: 500;
+}
+.nav-side-bar nav{
+    padding: 25px;
+}
+
+.nav-side-bar nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 30px;
+}
+.nav-side-bar nav ul li{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.nav-side-bar nav ul li:last-child{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.nav-side-bar nav ul li img {
+    margin-right: 10px;
+    
+}
+.nav-side-bar nav ul li a{
+    padding: 12px;
+    text-decoration: none;
+    color: var(--black4);
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 18px;
+    width: 80%;
+}
+.nav-side-bar > nav > ul > li > a:hover,
+.nav-side-bar > nav > ul > li:hover {
+    background-color: var(--mint1);
+    color: var(--white1);
+    border-radius: 15px;
+}
+nav ul li:hover a img{
+    filter: brightness(0) invert(1);
+
+}
+nav ul li:hover img{
+    filter: brightness(0) invert(1);
+}
+.icSetting{
+    margin-left: 12px;
+}
+.nav-link:hover{
+    color: var(--white1) !important; /* Chuyển đổi màu chữ sang trắng */
+}
+.nav-link{
+    width: 100%;
+    height: 100%;
+}
+
+/* .active {
+    background-color: var(--mint1);
+    border-radius: 15px;
+}
+.active a {
+    color: var(--white1) !important;
+}
+.active img {
+    filter: brightness(0) invert(1);
+} */
+nav li .quantity{
+    width: 25px;
+    height: 25px;
+    background-color: var(--red1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 22px;
+    font-size: 14px;
+    color: var(--white1);
+    margin-right: 8px;
+}
+
