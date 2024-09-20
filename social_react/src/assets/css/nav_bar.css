@@ -98,7 +98,7 @@ nav ul li:hover img{
     height: 100%;
 }
 
-/* .active {
+.active {
     background-color: var(--mint1);
     border-radius: 15px;
 }
@@ -107,7 +107,7 @@ nav ul li:hover img{
 }
 .active img {
     filter: brightness(0) invert(1);
-} */
+}
 nav li .quantity{
     width: 25px;
     height: 25px;

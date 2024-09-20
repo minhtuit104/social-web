@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryColumn, OneToMany, OneToOne, BeforeInsert } from "typeorm";
+import { Column, Entity, OneToMany, OneToOne, BeforeInsert, PrimaryGeneratedColumn } from "typeorm";
 import { Account } from "./Account";
 import { Post } from "./Post";
 
@@ -7,7 +7,7 @@ import { Post } from "./Post";
 export class User {
     //định nghĩa các tường có trong bảng
 
-    @PrimaryColumn({type: 'int'})
+    @PrimaryGeneratedColumn({type: 'int'})
     idUser: number;
 
     @Column({type: 'varchar', length: 200})
@@ -16,10 +16,10 @@ export class User {
     @Column({type: 'varchar', length: 200, unique: true})
     email: string;
 
-    @Column({nullable: true, type: 'date'})
-    birthday: Date;
+    @Column({nullable: true, type: 'varchar'})
+    birthday: string;
 
-    @Column({type: 'varchar', length: 200})
+    @Column({type: 'varchar', length: 200, default: null})
     avarta: string;
 
     @Column({nullable: true, type: 'datetime'})

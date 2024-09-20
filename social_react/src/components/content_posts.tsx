@@ -1,9 +1,11 @@
 import ImgProfile from "../assets/images/tu.jpg";
 import IconGlobal from "../assets/images/icons/ic_global.svg";
+import IconFriends from "../assets/images/icons/ic_friends.svg";
 import IconThreedot from "../assets/images/icons/ic_three-dot.svg";
 import IconBookmark from "../assets/images/icons/ic_bookmark.svg";
 import IconHide from "../assets/images/icons/ic_hide.svg";
 import IconReport from "../assets/images/icons/ic_report.svg";
+import IconEdit from "../assets/images/icons/ic_edit.svg";
 import IconLike from "../assets/images/icons/ic_like-fillsvg.svg";
 import IconLove from "../assets/images/icons/ic_love.svg";
 import IconHaha from "../assets/images/icons/ic_haha.svg";
@@ -12,17 +14,37 @@ import IconSad from "../assets/images/icons/ic_sad.svg";
 import IconAngry from "../assets/images/icons/ic_angry.svg";
 import IconCmt from "../assets/images/icons/ic_comment.svg";
 import IconShare from "../assets/images/icons/ic_share.svg";
-import Img1 from "../assets/images/anh1.jpg";
-import Img2 from "../assets/images/anh2.jpeg";
-import Img3 from "../assets/images/anh3.jpeg";
-import Img4 from "../assets/images/anh4.jpg";
 import "../assets/css/content_posts.css";
 import { useEffect, useRef, useState } from "react";
 import ModalComment from "./modal_comment";
+import { fetchPosts } from "../services/PostService";
+import { formatDistanceToNow } from "date-fns";
+import postEventEmitter from "../patternEventEmitter/postEventEmitter";
 
+
+interface Author {
+    avarta: string;
+    name: string;
+  }
+  
+  interface Post {
+    authorId: Author;
+    title: string;
+    image: string;
+    privacy: string;
+    totalEmotion: number;
+    totalComment: number;
+    createAt: Date;
+  }
+
+const privacyIcons: { [key: string]: string } = {
+    Publish: IconGlobal,
+    Friends: IconFriends,
+};
 
 const Posts = () => {
 
+    const [posts, setPosts] = useState<Post[]>([]);
     const [isMenuContent, setIsMenuContent] = useState(false);
     const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -37,6 +59,28 @@ const Posts = () => {
     };
 
     useEffect(() => {
+        // Gọi fetchPosts khi component được mount
+        getPosts();
+
+        //lắng nghe sự kiện postCreated
+        postEventEmitter.on('postCreated', (newPost: Post) => {
+            setPosts((prevPosts) => [newPost, ...prevPosts]);
+        });
+        //huỷ sự kiện lắng nghe postCreated
+        return () => {
+            postEventEmitter.removeAllListeners('postCreated'); 
+          };
+    }, []);
+
+    const getPosts = async () => {
+        let res = await fetchPosts();
+        if(res && res.data){
+            setPosts(res.data);
+            console.log("Danh sách bài post:", res.data); 
+        } 
+    }
+
+    useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
@@ -48,16 +92,26 @@ const Posts = () => {
         setIsShowModalCmt(false);
     }
 
+    const sortedPosts = Array.isArray(posts) ? posts.sort((a, b) => {
+        const dateA = new Date(a.createAt);
+        const dateB = new Date(b.createAt);
+        return dateB.getTime() - dateA.getTime();
+    }) : [];
+
     return(<>
     <div className="main-content">
         <div className="posts">
-                <div className="post">
+        {sortedPosts && sortedPosts.length > 0 ? (
+            sortedPosts.map((post, index) => (
+                <div className="post" key={`post-${index}`}>
                     <div className="post-header">
                         <div className="nav-post">
-                            <img src={ImgProfile} alt="Profile Image" className="post-profile-image"/>
+                            <img src={post.authorId.avarta ?? 'https://www.gravatar.com/avatar/?d=mp' } alt="Profile Image" className="post-profile-image"/>
                             <div className="post-info">
-                                <h3>Tạ Minh Tú</h3>
-                                <p>2 minutes ago<img src={IconGlobal} className="ic-18 time-privacy"/></p>
+                                <h3>{post.authorId.name}</h3>
+                                <p>
+                                    {formatDistanceToNow(new Date(post.createAt), { addSuffix: true })}
+                                    <img src={privacyIcons[post.privacy]} className="ic-18 time-privacy"/></p>
                             </div>
                         </div>
                         
@@ -70,39 +124,55 @@ const Posts = () => {
                                     <img src={IconBookmark} alt="" className="ic-18"/>
                                     <div className="options">
                                         <div>Save</div>
-                                        <p>Add this to your saved items.</p>
+                                        <span>Add this to your saved items.</span>
                                     </div>
                                 </button>
                                 <button className="menu-post-btn">
                                     <img src={IconHide} alt="" className="ic-18"/>
                                     <div className="options">
                                         <div>Hide</div>
-                                        <p>Hide this from your news feed.</p>
+                                        <span>Hide this from your news feed.</span>
                                     </div>
                                 </button>
                                 <button className="menu-post-btn">
                                     <img src={IconReport} alt="" className="ic-18" />
                                     <div className="options">
                                         <div>Report</div>
-                                        <p>We won't let user know who reported this.</p>
+                                        <span>We won't let user know who reported this.</span>
+                                    </div>
+                                </button>
+                                <button className="menu-post-btn">
+                                    <img src={IconEdit} alt="" className="ic-18" />
+                                    <div className="options">
+                                        <div>Edit</div>
+                                        <span>Edit article as required.</span>
                                     </div>
                                 </button>
                             </div>
                         </div>
                     </div>
-                    <p>This is the most beautiful place I've ever been. I wish I would come back here to be able to discover more interesting things.</p>
+                    <p>{post.title}</p>
                     <div className="post-images">
-                        <img src={Img1} alt="Post Image" className="image"/>
-                        <img src={Img2} alt="Post Image" className="image"/>
-                        <img src={Img3} alt="Post Image" className="image"/>                        
-                        <img src={Img4} alt="Post Image" className="image"/>                        
-                        <img src={Img4} alt="Post Image" className="image"/>                        
+                        {post.image && post.image.length > 0 ? (
+                            post.image.split(',').slice(0,3).map((imageUrl, imgIndex) => (
+                                <div className={`image-container ${imgIndex === 2 ? 'large-image' : 'small-image'}`} key={`img-${imgIndex}`}>
+                                    <img src={imageUrl.trim()} alt={`Post image ${imgIndex + 1}`} className={`image ${imgIndex === 2 ? 'large-image' : 'small-image'}`}/>
+                                    {imgIndex === 2 && post.image.split(',').length > 3 && (
+                                        <div className="image-overlay">
+                                            +{post.image.split(',').length - 3}
+                                        </div>
+                                    )}
+                                </div>
+                            ))
+                        ) : (
+                            <></>
+                        )}                     
                     </div>
                     <div className="post-footer">
                         <div className="like-comment">
                             <div className="main-reaction">
                                 <img src={IconLike} className="ic-like-comment" id="mainReaction"/>
-                                <span className="feelingCount">100</span>
+                                <span className="feelingCount">{post.totalEmotion}</span>
                                 <div className="feeling-options" id="feelingOptions">
                                     <img src={IconLike} alt="Like" className="feeling-icon" data-reaction="like-fillsvg"/>
                                     <img src={IconLove} alt="Love" className="feeling-icon" data-reaction="love"/>
@@ -113,14 +183,17 @@ const Posts = () => {
                                 </div>
                             </div>
                             <button className="comment-btn" onClick={() => setIsShowModalCmt(true)}><img src={IconCmt} alt="comment" className="ic-like-comment"/></button>
-                            <span>18</span>
+                            <span>{post.totalComment}</span>
                         </div>
                         <div className="share">
                             <img src={IconShare} alt="" className="ic-share"/>
                         </div>
                     </div>
                 </div>
-                
+            ))
+        ) : (
+            <p>No posts available.</p>
+        )}
         </div>
     </div>
     <ModalComment 
@@ -128,6 +201,6 @@ const Posts = () => {
     handleClose = {handleClose}
     />
     </>);
-}
+};
 
 export default Posts;

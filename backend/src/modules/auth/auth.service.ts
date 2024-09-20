@@ -21,23 +21,23 @@ export class AuthService{
 
     async register(createUserDto: CreateUserDto){
         //kiểm tra xem idUser đã tồn tại hay chưa
-        const findUserById = await this.userRepository.findOne({
-            where: {idUser: createUserDto.idUser},
-        });
+        // const findUserById = await this.userRepository.findOne({
+        //     where: {idUser: createUserDto.idUser},
+        // });
         const findUserByEmail = await this.userRepository.findOne({where: {email: createUserDto.email}});
         //kiểm tra
-        if(findUserById || findUserByEmail){
+        if(findUserByEmail){
             throw new HttpException('idUser hoặc email đã tồn tại', 400);
         }else{
             //tạo ra một đối tượng user
             const newUser: CreateUserDto = {
-                idUser: createUserDto.idUser,
+                
                 name: createUserDto.name,
                 email: createUserDto.email,
                 birthday: createUserDto.birthday,
                 avarta: createUserDto.avarta,
                 password: createUserDto.password,
-                role: createUserDto.role
+                active: createUserDto.active
             }
             //khởi tạo newInstance
             const newUserInstance = await this.userRepository.save(newUser);
@@ -46,7 +46,6 @@ export class AuthService{
                 idUser: newUserInstance.idUser,
                 email: createUserDto.email,
                 password: createUserDto.password,
-                role: createUserDto.role,
                 refreshToken: ""
                 
             });

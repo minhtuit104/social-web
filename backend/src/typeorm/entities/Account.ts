@@ -24,7 +24,7 @@ export class Account{
     @Column({type: 'varchar', length: 300})
     refreshToken: string;
 
-    @Column({type: 'int'})
+    @Column({type: 'int', default: '1' })
     role: number;
 
     @BeforeInsert()
