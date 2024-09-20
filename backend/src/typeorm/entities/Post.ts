@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, Column, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { User } from "./User";
 
 @Entity({name: 'post'})
@@ -7,26 +7,28 @@ export class Post{
     idPost: number;
     
     @ManyToOne(() => User, user => user.posts, { nullable: false })
-    @JoinColumn({ name: 'author'})
+    @JoinColumn({ name: 'authorId'})
     authorId: User;
 
-    @Column({type: 'int'})
-    author: number;
-
-    @Column({type: 'varchar', length: 500})
+    @Column({type: 'varchar', length: 5000})
     title: string;
 
-    @Column({type: 'varchar', length: 200})
+    @Column({type: 'text', nullable: true })
     image: string;
 
     @Column({type: 'varchar', length: 200})
     privacy: string;
 
-    @Column({type: 'int'})
+    @Column({type: 'int', default: "0"})
     totalEmotion: number;
 
-    @Column({type: 'int'})
+    @Column({type: 'int', default: "0"})
     totalComment: number;
 
+    @CreateDateColumn({type: 'timestamp'})
+    createAt: Date;
+
+    @UpdateDateColumn({type: 'timestamp'})
+    updateAt: Date;
 
 }

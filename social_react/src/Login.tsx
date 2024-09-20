@@ -2,7 +2,7 @@ import IconUser from "./assets/images/icons/ic_user.svg";
 import IconEye from "./assets/images/icons/ic_eye.svg";
 import IconLockEye from "./assets/images/icons/ic_lock_eye.svg";
 import { useState } from "react";
-import {loginApi} from './services/UserService';
+import {loginApi, registerApi} from './services/UserService';
 import { toast } from "react-toastify";
 import {useNavigate} from "react-router-dom";
 
@@ -45,7 +45,38 @@ const Login = () => {
         } catch (err) {
             console.error("Login error:", err);
         }
-    } 
+    }
+
+
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        birthday: '',
+        password: ''
+      });
+    
+      const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData({
+          ...formData,
+          [e.target.name]: e.target.value
+        });
+      };
+    const handleRegister = async (e: React.FormEvent) => {
+        e.preventDefault();
+    
+        try {
+            let res = await registerApi(formData.name, formData.email, formData.birthday, formData.password);
+            console.log('Registration successful:', res);
+            toast.success("Register successful!");
+            navigate("/login");
+            // Handle successful registration (e.g., redirect to login)
+        } catch (error) {
+            console.error('Registration failed:', error);
+            toast.error("Register failed!!!");
+            // Handle registration error
+        }
+    };
+
 
     return (
         <div className="main-container">
@@ -86,28 +117,49 @@ const Login = () => {
                             </div>
                         </form>
                     </div>
-
+                    
+                    {/*start form đăng kí */}
                     <div className="form-box register">
-                        <form action="#"> 
+                        <form action="#" onSubmit={handleRegister}> 
                             <h2>Registration</h2>
+                            
                             <div className="input-field">
-                                <input type="text" id="register_idUser" placeholder="IdUser"  required/>
+                                <input 
+                                type="text"
+                                name="name"
+                                placeholder="Name"
+                                value={formData.name}
+                                onChange={handleChange}
+                                required/>
                             </div>
 
                             <div className="input-field">
-                                <input type="text" id="register_name" placeholder="Name"  required/>
+                                <input 
+                                type="text"
+                                name="email"
+                                placeholder="Email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                required/>
                             </div>
 
                             <div className="input-field">
-                                <input type="text" id="register_email" placeholder="Email"  required/>
+                                <input 
+                                type="date" 
+                                name="birthday" 
+                                placeholder="Birthday"
+                                value={formData.birthday}  
+                                onChange={handleChange}
+                                required/>
                             </div>
 
                             <div className="input-field">
-                                <input type="date" id="register_birthday" placeholder="Birthday"  required/>
-                            </div>
-
-                            <div className="input-field">
-                                <input type="password" id="register_password" placeholder="Password "  required/>
+                                <input type="password" 
+                                name="password" 
+                                placeholder="Password " 
+                                value={formData.password}
+                                onChange={handleChange}
+                                required/>
                             </div>
 
                             <button type="submit" className="login">Register</button>

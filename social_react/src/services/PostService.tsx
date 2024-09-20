@@ -1,7 +1,46 @@
 import axios from "./axios";
 
 const fetchPosts = async () =>{
-    return await axios.get('/api/v1/posts');
-}
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.error('Token is missing');
+        return;
+    }
+    
+    try {
+        // Gọi API với token trong header Authorization
+        return await axios.get('/api/v1/posts', {
+            headers: {
+                Authorization: `Bearer ${token}` 
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching posts:', error);
+        throw error; // Ném lỗi để xử lý sau này
+    }
+};
 
-export {fetchPosts};
+const createPost = async (postData: any) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.error('Token is missing');
+        return;
+    }
+
+    try {
+
+        const response =  await axios.post('/api/v1/posts', postData, {
+            headers: {
+                Authorization: `Bearer ${token}` 
+            }
+        });
+
+        return response;
+
+    } catch (error) {
+        console.error('Error creating post:', error);
+        throw error;
+    }
+};
+
+export {fetchPosts, createPost};

@@ -18,12 +18,20 @@
     border-radius: 50%;
     margin-right: 16px;
 }
-.post-input input {
+.post-input-top button {
     width: 90%;
-    padding: 14px;
+    padding: 10px;
     border: 1px solid #ccc;
     border-radius: 20px;
+    font-size: 15px;
+    font-weight: 550;
+    color: var(--black5);
     outline: none;
+    text-align: left;
+    background: rgba(234, 234, 234, 0.2);
+}
+.post-input-top button:hover{
+    background: rgba(79, 74, 74, 0.2);
 }
 
 .post-input .post-actions {
@@ -59,15 +67,7 @@
     padding: 0;
 
 }
-/* .post-actions .privacy-down .friends-btn .optionpublish{
-    margin-bottom: 2px;
-    width: 100%;
-    padding: 2px;
-}
-.post-actions .privacy-down .friends-btn .optionfriends{
-    width: 100%;
-    padding: 2px;
-} */
+
 .post-actions .privacy-down .friends-btn button:hover{
     background-color: var(--grey5);
     border-radius: 8px;
@@ -79,4 +79,135 @@
 
 .post-actions button .list {
     margin-left: 4px;
+}
+
+.modal-content{
+    border-radius: 10px !important;
+}
+
+.custom-modal{
+    max-width: 650px !important;
+    width: 100% !important;
+}
+
+.modal-post-header{
+    display: flex;
+}
+.modal-post-header .post-info span{
+    font-size: 18px;
+    font-weight: 700;
+}
+.privacy-down .privacy-btn{
+    display: flex;
+    border: none;
+    padding: 2px;
+    border-radius: 6px;
+    background: var(--grey5);
+    align-items: center;
+    font-weight: 600;
+    font-size: 14px;
+}
+.privacy-down .privacy-btn img{
+    margin-right: 2px;
+}
+.privacy-down .privacy-btn .list{
+    margin-left: 2px;
+}
+.privacy-options{
+    position: absolute;
+    background-color: var(--white3);
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 3px;
+}
+
+.privacy-option {
+    padding: 5px 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 600;
+}
+.privacy-option img{
+    margin-right: 2px;
+}
+.privacy-option:hover {
+    background-color: #f0f0f0;
+}
+
+.modal-post-content{
+    margin-top: 20px;
+}
+.modal-post-content textarea{
+    outline: none;
+    border: none;
+    width: 100%;
+    height: 80px;
+    background: none;
+    word-wrap: break-word; 
+    overflow-wrap: break-word;
+}
+
+.modal-post-actions button{
+    background: none;
+    border: none;
+    border-radius: 8px;
+    padding: 5px;
+    display: flex;
+    font-size: 14px;
+    font-weight: 700;
+    float: right;
+}
+.modal-post-actions button:hover{
+    background: var(--grey5);
+}
+.image-preview{
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    gap: 3px;
+    overflow-x: auto;
+    width: 100%;
+    padding-bottom: 10px;
+}
+.show-image{
+    position: relative;
+    width: 170px;
+    height: 280px;
+    margin-bottom: 10px;
+    flex: 0 0 auto;
+}
+.show-image img {
+    border-radius: 5px;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+.show-image button{
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    color: var(--black1);
+    border: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: var(--grey5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-footer button{
+    background-color: var(--blue1) !important;
+    
+
+}
+.modal-footer button[disabled=disabled], button:disabled {
+    cursor: not-allowed;
+}
+.showSavePost{
+    background-color: var(--blue1);
+    color: var(--white1);
 }

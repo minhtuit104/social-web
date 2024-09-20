@@ -1,12 +1,32 @@
 import axios from "axios";
 
-
+const getToken = () => {
+  return localStorage.getItem("token");
+};
 
 const instance = axios.create({
     baseURL: 'http://localhost:3000',
-  });
+});
 
-  instance.interceptors.response.use(function (response) {
+//hàm giúp để thêm token vào mọi request
+instance.interceptors.request.use(
+  function(config){
+    const token = getToken();
+    if (!config.headers) {
+      config.headers = {};
+    }
+    if(token){
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  }, function(error){
+    return Promise.reject(error);
+  }
+);
+
+//hàm để xử lý mọi reponse
+instance.interceptors.response.use(function (response) {
     // Any status code that lie within the range of 2xx cause this function to trigger
     // Do something with response data
     return response.data;
@@ -19,9 +39,10 @@ const instance = axios.create({
       res.data = error.response.data;
       res.status = error.response.status;
       res.headers = error.response.headers;
+      console.error('Error Response:', res.data);
     } else if (error.request) {
       // The request was made but no response was received
-      console.log(error.request);
+      console.log("No Response",error.request);
     } else {
       // Something happened in setting up the request that triggered an Error
       console.log('Error', error.message);

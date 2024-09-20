@@ -59,7 +59,7 @@
 }
 .posts .post-header .menu-items .menu-content{
     position: absolute;
-    left: -325px;
+    left: -270px;
     background-color: var(--white1);
     padding: 6px;
     border: 2px solid #ccc;
@@ -89,9 +89,9 @@
     font-weight: 600;
     color: var(--black1);
 }
-.menu-items .menu-post-btn .options p {
+.menu-items .menu-post-btn .options span {
     text-align: left;
-    font-size: 10;
+    font-size: 13px;
     font-weight: 400;
     color: var(--black8);
 }
@@ -111,54 +111,45 @@
     position: relative;
 }
 
-.posts .post-images .image{
-    /* margin-right: 20px; */
+
+.post-images .image-container{
+    position: relative;
+}
+.small-image{   
     border-radius: 14px;
-    /* max-height: 200px;
-    height: auto;
-    width: auto; */
-    width: 175px;
-    height: 280px;
+    width: 200px;
+    height: 300px;
     object-fit: cover;
 }
-/* .extra-images {
+.large-image {
+    width: 375px; 
+    height: 300px; 
+    object-fit: cover;
+    border-radius: 14px;
+    position: relative;
+}
+.image-overlay {
     position: absolute;
     top: 0;
-    right: 0;
-    width: 275px;
-    height: 280px;
-    border-radius: 14px;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-size: cover;
-    background-position: center;
-    color: white;
-    font-size: 24px;
-    z-index: 1;
-    overflow: hidden;
+    border-radius: 14px;
 }
-.extra-images::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 1;
-}
-.extra-images span {
-    position: relative;
-    z-index: 2;
-} */
 
-.posts .post .post-footer {
+.post .post-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
-.post .post-footer .like-comment {
+.post-footer .like-comment {
     display: flex;
     align-items: center;
     position: relative;

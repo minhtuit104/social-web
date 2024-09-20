@@ -19,8 +19,8 @@ export class AuthController{
                 message: 'Register success!',
             });
         } catch (error) {
-            return res.status(500).json({
-                status: 500,
+            return res.status(400).json({
+                status: 400,
                 message: error,
             });
             // throw new HttpException('Login failed', HttpStatus.INTERNAL_SERVER_ERROR);

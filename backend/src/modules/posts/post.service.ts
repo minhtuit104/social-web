@@ -6,16 +6,19 @@ import { CreatePostDto } from "./dtos/create.dto";
 import { PostDTO } from "./dtos/postDTO";
 import { plainToInstance } from "class-transformer";
 import { UpdatePostDto } from "./dtos/update.dto";
+import { User } from "src/typeorm/entities/User";
 
 @Injectable()
 
 export class PostService{
 
-    constructor(@InjectRepository(Post) private postRepository: Repository<Post>) {}
+    constructor(
+        @InjectRepository(Post) private postRepository: Repository<Post>,
+        @InjectRepository(User) private userRepository: Repository<User>) {}
 
     async findAll(){
         return await this.postRepository.find({
-            relations: ['author'],
+            relations: ['authorId'],
         });
     }
 
@@ -39,14 +42,21 @@ export class PostService{
         }
     }
 
-    async create(createPostDto: CreatePostDto){
-        const newPost = {
+    async create(createPostDto: CreatePostDto, authorId: number){
+        
+        const newInstance = this.postRepository.create({
             ...createPostDto,
+            authorId: {idUser: authorId}
+        });
+
+        const savePost = await this.postRepository.save(newInstance);
+
+        const author = await this.userRepository.findOne({where: {idUser: authorId}});
+
+        return {
+            ...savePost,
+            authorId: author
         };
-
-        const newInstance = this.postRepository.create(newPost);
-
-        return await this.postRepository.save(newInstance);
     }
 
     async update(id: number, updatePostDto: UpdatePostDto){

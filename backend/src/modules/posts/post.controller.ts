@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards, Response,} from "@nestjs/common";
 import { PostService } from "./post.service";
 import { CreatePostDto } from "./dtos/create.dto";
 import { UpdatePostDto } from "./dtos/update.dto";
 import {JwtAuthGuard} from "../auth/jwtAuthGuard/jwtAuthGuard";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { Req } from "@nestjs/common";
 
 @ApiBearerAuth()
 @ApiTags('Posts')
@@ -14,8 +15,13 @@ export class PostController{
 
     @Get()
     @UseGuards(JwtAuthGuard)
-    findAll(){
-        return this.postService.findAll();
+    async findAll(@Response() res){
+        const posts = await this.postService.findAll();
+        return res.status(200).json({
+            status: 'success',
+            message: 'Posts retrieved successfully',
+            data: posts,
+          });
     }
 
     @Get('/:id')
@@ -32,8 +38,16 @@ export class PostController{
 
     @Post()
     @UseGuards(JwtAuthGuard)
-    create(@Body() createPostDto: CreatePostDto){
-        return this.postService.create(createPostDto);
+    async create(@Body() createPostDto: CreatePostDto, @Req() req: Request, @Response() res ){
+        //lấy idUser từ accessToken trong request
+        const user = req['user'];
+        const authorId = user.idUser;
+        const post =  await this.postService.create(createPostDto, authorId);
+        return res.status(200).json({
+            status: 'success',
+            message: 'create post successfully',
+            data: post,
+          });
     }
 
     @Put('/:id')

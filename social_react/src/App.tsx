@@ -4,13 +4,18 @@ import './assets/css/styles.css';
 import Login from './Login';
 import { ToastContainer } from 'react-toastify';
 import HomePage from './pages/HomePage';
+import { AuthRoute, PrivateRoute } from './routers/protectRouter';
+
 
 function App() {
   return (<>
     <div className="App">
     <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/home" element={<HomePage />} />
+      {/* khi đã đăng nhập thì không đueọc vào trang Login */}
+      <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
+      {/* Chỉ có thể vào trang feed nếu đã đăng nhập */}
+      <Route path="/home" element={<PrivateRoute><HomePage /></PrivateRoute>} />
+      <Route path="/" element={<PrivateRoute><HomePage /></PrivateRoute>} />
     </Routes>
     </div>
     <ToastContainer
