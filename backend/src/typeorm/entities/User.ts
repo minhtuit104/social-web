@@ -1,6 +1,9 @@
 import { Column, Entity, OneToMany, OneToOne, BeforeInsert, PrimaryGeneratedColumn } from "typeorm";
 import { Account } from "./Account";
 import { Post } from "./Post";
+import { Comment } from "./Comment";
+import { SubComment } from "./SubComment";
+import { Messager } from "./Messager";
 
 //tên bảng
 @Entity({ name: 'user'})
@@ -36,4 +39,15 @@ export class User {
     @OneToMany(() => Post, post => post.authorId)
     posts: Post[];
 
+    @OneToMany(() => Comment, comment => comment.user)
+    comments: Comment[];
+
+    @OneToMany(() => SubComment, subcomment  => subcomment .user)
+    subComments: SubComment[];
+
+    @OneToMany(() => Messager, (messager) => messager.sender)
+    sentMessagers: Messager[];
+
+    @OneToMany(() => Messager, (messager) => messager.receiver)
+    receivedMessagers: Messager[];
 }

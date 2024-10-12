@@ -199,11 +199,7 @@
     justify-content: center;
 }
 
-.modal-footer button{
-    background-color: var(--blue1) !important;
-    
 
-}
 .modal-footer button[disabled=disabled], button:disabled {
     cursor: not-allowed;
 }

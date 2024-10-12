@@ -53,7 +53,7 @@ const ModalInputPost: React.FC<any> = (props) => {
           try {
             const userData = await fectchUserName(idUser);
             console.log("check userData: ", userData);
-            if(userData && userData.name && userData.avarta){
+            if(userData && userData.name){
               setUserName(userData.name);
               setAvarta(userData.avarta);
             }
@@ -135,7 +135,7 @@ const ModalInputPost: React.FC<any> = (props) => {
         <Modal.Body>
             <div>
                 <div className="modal-post-header">
-                    <img src={ImgAvatar} alt="Profile Image" className="post-profile-image"/>
+                    <img src={avarta ?? 'https://www.gravatar.com/avatar/?d=mp' } alt="Profile Image" className="post-profile-image"/>
                     <div className="post-info">
                         <span>{userName}</span>
                         <div className="privacy-down">

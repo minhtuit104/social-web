@@ -10,6 +10,13 @@ import { AccountModule } from './modules/accounts/account.module';
 import { Post } from './typeorm/entities/Post';
 import { PostModule } from './modules/posts/post.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { CommentModule } from './modules/comment/comment.module';
+import { Comment } from './typeorm/entities/Comment';
+import { SubComment } from './typeorm/entities/SubComment';
+import { SubCommentModule } from './modules/subcomment/subcomment.module';
+import { MessagerModule } from './modules/messager/messager.module';
+import { Messager } from './typeorm/entities/Messager';
+import { GatewayModule } from './modules/gateway/gateway.module';
 
 @Module({
   imports: [
@@ -21,13 +28,18 @@ import { AuthModule } from './modules/auth/auth.module';
       host: "localhost",
       type: "mysql",
       autoLoadEntities: true,
-      entities: [User,Account, Post],
+      entities: [User,Account, Post, Comment, SubComment, Messager],
       synchronize: true,
     }),
     AuthModule,
     UserModule,
     AccountModule,
-    PostModule],
+    PostModule,
+    CommentModule,
+    SubCommentModule,
+    MessagerModule,
+    GatewayModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

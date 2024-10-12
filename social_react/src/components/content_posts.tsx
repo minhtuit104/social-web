@@ -28,6 +28,7 @@ interface Author {
   }
   
   interface Post {
+    idPost: number;
     authorId: Author;
     title: string;
     image: string;
@@ -51,13 +52,19 @@ const Posts = () => {
     const handleShowMenu = () =>{
         setIsMenuContent(!isMenuContent);
     };
-
     const handleClickOutside = (event: MouseEvent) => {
         if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
             setIsMenuContent(false);
         }
     };
+    useEffect(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
+    //hàm xử lý và hiển thị hình ảnh 
     useEffect(() => {
         // Gọi fetchPosts khi component được mount
         getPosts();
@@ -80,18 +87,20 @@ const Posts = () => {
         } 
     }
 
-    useEffect(() => {
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
-
+    //Show modal comment
     const [isShowModalCmt, setIsShowModalCmt] = useState(false)
+    const [selectPostId, setSelectPostId] = useState<number | null>(null);
+
+    const handleShowModalComment = (idPost: number) => {
+        setSelectPostId(idPost); //cap nhật idPost đã chọn
+        setIsShowModalCmt(true);
+    }
     const handleClose = () =>{
         setIsShowModalCmt(false);
+        setSelectPostId(null); //xóa idPost khi đóng moadal
     }
 
+    //Hàm sắp xếp các bài post theo thời gian mới nhất -> lâu nhất
     const sortedPosts = Array.isArray(posts) ? posts.sort((a, b) => {
         const dateA = new Date(a.createAt);
         const dateB = new Date(b.createAt);
@@ -111,7 +120,7 @@ const Posts = () => {
                                 <h3>{post.authorId.name}</h3>
                                 <p>
                                     {formatDistanceToNow(new Date(post.createAt), { addSuffix: true })}
-                                    <img src={privacyIcons[post.privacy]} className="ic-18 time-privacy"/></p>
+                                    <img src={privacyIcons[post.privacy]} alt="Privacy" className="ic-18 time-privacy"/></p>
                             </div>
                         </div>
                         
@@ -171,7 +180,7 @@ const Posts = () => {
                     <div className="post-footer">
                         <div className="like-comment">
                             <div className="main-reaction">
-                                <img src={IconLike} className="ic-like-comment" id="mainReaction"/>
+                                <img src={IconLike} className="ic-like-comment" alt="Like" id="mainReaction"/>
                                 <span className="feelingCount">{post.totalEmotion}</span>
                                 <div className="feeling-options" id="feelingOptions">
                                     <img src={IconLike} alt="Like" className="feeling-icon" data-reaction="like-fillsvg"/>
@@ -182,7 +191,7 @@ const Posts = () => {
                                     <img src={IconAngry} alt="Angry" className="feeling-icon" data-reaction="angry"/>
                                 </div>
                             </div>
-                            <button className="comment-btn" onClick={() => setIsShowModalCmt(true)}><img src={IconCmt} alt="comment" className="ic-like-comment"/></button>
+                            <button className="comment-btn" onClick={() => handleShowModalComment(post.idPost)}><img src={IconCmt} alt="comment" className="ic-like-comment"/></button>
                             <span>{post.totalComment}</span>
                         </div>
                         <div className="share">
@@ -196,10 +205,14 @@ const Posts = () => {
         )}
         </div>
     </div>
-    <ModalComment 
-    show = {isShowModalCmt}
-    handleClose = {handleClose}
-    />
+    {isShowModalCmt && selectPostId && (
+        <ModalComment 
+        show = {isShowModalCmt}
+        idPost = {selectPostId}
+        handleClose = {handleClose}
+        />
+    )}
+    
     </>);
 };
 
