@@ -17,7 +17,8 @@ import { SubCommentModule } from './modules/subcomment/subcomment.module';
 import { MessagerModule } from './modules/messager/messager.module';
 import { Messager } from './typeorm/entities/Messager';
 import { GatewayModule } from './modules/gateway/gateway.module';
-
+import { Notification } from './typeorm/entities/Notification';
+import { NotificationModule } from './modules/notification/notification.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -28,7 +29,7 @@ import { GatewayModule } from './modules/gateway/gateway.module';
       host: "localhost",
       type: "mysql",
       autoLoadEntities: true,
-      entities: [User,Account, Post, Comment, SubComment, Messager],
+      entities: [User,Account, Post, Comment, SubComment, Messager, Notification],
       synchronize: true,
     }),
     AuthModule,
@@ -39,6 +40,7 @@ import { GatewayModule } from './modules/gateway/gateway.module';
     SubCommentModule,
     MessagerModule,
     GatewayModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

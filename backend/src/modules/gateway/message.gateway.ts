@@ -8,9 +8,13 @@ import {
     MessageBody } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { MessagerService } from '../messager/messager.service';
+import { JwtService } from '@nestjs/jwt';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwtAuthGuard/jwtAuthGuard';
-import { JwtService } from '@nestjs/jwt';
+import { CommentService } from '../comment/comment.service';
+import { PostService } from '../posts/post.service';
+import { NotificationService } from '../notification/notification.service';
+import { UserService } from '../users/user.service';
 
 @WebSocketGateway({
   cors: {
@@ -23,11 +27,15 @@ export class MyGateway implements OnGatewayConnection, OnGatewayDisconnect{
 
   constructor(
     private readonly messageService: MessagerService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly commentService: CommentService,
+    private readonly postService: PostService,
+    private readonly notificationService: NotificationService,
+    private readonly userService: UserService,
   ) {}
 
   // Hàm này sẽ được gọi khi client kết nối
-//   @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   handleConnection(client: Socket) {
     try{
         //lấy token từ client
@@ -40,7 +48,6 @@ export class MyGateway implements OnGatewayConnection, OnGatewayDisconnect{
         const idUser = decodedToken.idUser;
         client.data.idUser = idUser;
         console.log(`User ${idUser} connected`);
-        console.log("idUser nguoi gui---------->: ", idUser);
     }catch(error){
         console.log("Invalid token", error);
         client.disconnect();
@@ -68,6 +75,41 @@ export class MyGateway implements OnGatewayConnection, OnGatewayDisconnect{
     if(receiverSocket){
         this.server.to(receiverSocket.id).emit('receiveMessage', message);
     }
+  }
+
+  //bắt sự kiện khi người dùng thêm bình luận
+  @SubscribeMessage('newComment')
+  async handleNewComment(
+    @MessageBody() data: { idPost: number, comment: string },
+    @ConnectedSocket() client: Socket
+  ) {
+      const idUser = client.data.idUser;
+      //gọi service để lưu bình luận
+      const newComment = await this.commentService.createdComment({
+        idPost: data.idPost,
+        comment: data.comment
+      }, idUser);
+
+      //lấy user từ idUser
+      const user = await this.userService.findOne(idUser);
+      // Lấy thông tin bài viết
+      const post = await this.postService.findOne(data.idPost);
+
+      // Tạo thông báo khi có bình luận mới
+      await this.notificationService.createCommentNotification(post, newComment, user);
+
+      //phát sự kiện 'newComment' đến người dùng liên quan
+      const postAuthorId = await this.postService.findOne(data.idPost);
+      //gửi thông báo bình luận tới tác giả bài viết
+      const postAuthorSocket = this.getSocketByUserId(postAuthorId.authorId.idUser);
+      if(postAuthorSocket){
+        this.server.to(postAuthorSocket.id).emit('receiveNewComment', {
+          postId: data.idPost,
+          comment: data.comment,
+          author: newComment.user.name
+        });
+      }
+      return newComment;
   }
 
   //lấy socket theo id người dùng theo idUser

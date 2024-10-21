@@ -18,7 +18,7 @@ function App() {
           <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
         {/* Chỉ có thể vào trang feed nếu đã đăng nhập */}
           <Route path="/home" element={<PrivateRoute><HomePage /></PrivateRoute>} />
-          <Route path="/messager" element={<PrivateRoute><Messeager /></PrivateRoute>} />
+          <Route path="/home/messager" element={<PrivateRoute><Messeager /></PrivateRoute>} />
           <Route path="/" element={<PrivateRoute><HomePage /></PrivateRoute>} />
         </Routes>
       </div>

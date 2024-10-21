@@ -7,7 +7,7 @@ export class Account{
 
     @PrimaryGeneratedColumn({type: 'int'})
     idAccount: number;
-
+    
     @OneToOne(() => User, user => user.accounts)
     @JoinColumn({ name: 'idUser' })
     user: User;

@@ -1,4 +1,3 @@
-import ImgProfile from "../assets/images/tu.jpg";
 import IconGlobal from "../assets/images/icons/ic_global.svg";
 import IconFriends from "../assets/images/icons/ic_friends.svg";
 import IconThreedot from "../assets/images/icons/ic_three-dot.svg";
@@ -83,7 +82,6 @@ const Posts = () => {
         let res = await fetchPosts();
         if(res && res.data){
             setPosts(res.data);
-            console.log("Danh sách bài post:", res.data); 
         } 
     }
 

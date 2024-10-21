@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, ReactNode, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, ReactNode, useMemo, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
 
 // Context để quản lý kết nối WebSocket
@@ -9,7 +9,24 @@ interface WebSocketProviderProps {
 }
 
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
-  const socket = useMemo(() => {
+  const [socket, setSocket] = useState<Socket | null>(null);
+
+
+  // const socket = useMemo(() => {
+  //   const token = localStorage.getItem('token');
+  //   if(token){
+  //   const newSocket = io('http://localhost:3000', {
+  //       auth: { token: token }, 
+  //       reconnection: true,
+  //       reconnectionAttempts: 5,
+  //       reconnectionDelay: 1000,
+  //     });
+  //     return newSocket;
+  //   }
+  //   return null;
+  // }, []);
+
+  useEffect(() => {
     const token = localStorage.getItem('token');
     const newSocket = io('http://localhost:3000', {
         auth: { token: token }, 
@@ -17,15 +34,25 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
         reconnectionAttempts: 5,
         reconnectionDelay: 1000,
       });
-      return newSocket;
-  }, []);
 
-  useEffect(() => {
+    setSocket(newSocket);
+    // Lắng nghe sự kiện kết nối thành công
+    newSocket.on('connect', () => {
+      console.log('Socket connected');
+    });
+
+    // Lắng nghe sự kiện mất kết nối
+    newSocket.on('disconnect', () => {
+      console.log('Socket disconnected');
+    });
+        
     // Cleanup khi component bị unmount
     return () => {
-      socket.disconnect();
+      if (newSocket) {
+        newSocket.disconnect();
+      }
     };
-  }, [socket]);
+  }, []);
 
   return (
     <WebSocketContext.Provider value={socket}>

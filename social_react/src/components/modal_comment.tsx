@@ -8,6 +8,27 @@ import { addComment, addSubComment, fetchCommentsById } from "../services/Commen
 import CommentParent from "./comment_parent";
 import CommentChild from "./comment_child";
 import { fectchUserName } from "../services/UserService";
+import { useWebSocket } from "../WebSocket/WebSocketProvider";
+
+//hàm giải mã lấy idUser
+const getUserFromToken = () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        window
+          .atob(base64)
+          .split('')
+          .map(function (c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          })
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    }
+    return null;
+  };
 
 
 const ModalComment = (props: any) => {
@@ -17,6 +38,21 @@ const ModalComment = (props: any) => {
     const [newComment, setNewComment] = useState('');
     const [newSubComment, setNewSubComment] = useState('');
     const [commentId, setCommentId] = useState<number | null>(null);
+    const [user, setUser] = useState<any>(null);
+    const socket = useWebSocket();
+
+    const userInfo = getUserFromToken();
+    const idUser = userInfo?.idUser;
+
+    useEffect(() => {
+        const getUser = async () => {
+            if (idUser) {
+                const userData = await fectchUserName(idUser);
+                setUser(userData);
+            }
+        };
+        getUser();
+    }, [idUser]);
 
     useEffect(() =>{
 
@@ -43,20 +79,39 @@ const ModalComment = (props: any) => {
             return;
         }
         try {
-            //gọi api thông qua CommentService
-            const data =  await addComment({
+            if (socket) {
+                socket.emit('newComment', {
                     idPost,
                     comment: newComment
-            })
-            console.log("/////check res: ", data.data);
-
-            //đảm bảo comment mới tạo có đối tượng subComments trống
-            const newCommentWithSubcomment ={
-                ...data.data,
-                subComments: [],
+                });
+            } else {
+                // Nếu socket không khả dụng, sử dụng API thông thường
+                await addComment({
+                    idPost,
+                    comment: newComment
+                });
             }
-            setComments([...comments, newCommentWithSubcomment]); //thêm comment mới vào danh sách
+
+            // Đảm bảo comment mới tạo có đối tượng subComments trống
+            const newCommentWithSubcomments = {
+                comment: newComment,
+                user: {
+                    name: user?.name,
+                    avarta: user?.avarta
+                },
+                createdAt: new Date().toISOString(),
+                subComments: [],
+            };
+
+            setComments([...comments, newCommentWithSubcomments]); // Thêm comment mới vào danh sách
+            // const newCommentWithSubcomment ={
+            //     ...data.data,
+            //     subComments: [],
+            // }
+            // setComments([...comments, newCommentWithSubcomment]); //thêm comment mới vào danh sách
             setNewComment(''); // reset input sao khi gửi comment
+
+            
 
         } catch (error) {
             console.error('Error adding comment:', error);
@@ -166,7 +221,7 @@ const ModalComment = (props: any) => {
                 </div>
             </Modal.Body>
             <Modal.Footer>              
-                    <img src={ImgTu} alt="Tu" className="avatar-comment"/>
+                    <img src={user?.avarta ?? 'https://www.gravatar.com/avatar/?d=mp'} alt="Tu" className="avatar-comment"/>
                     <div className="modal-footer-input">
                         <input 
                         type="text" 

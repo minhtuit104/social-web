@@ -1,9 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Req, Response, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Req, Response, UseGuards } from "@nestjs/common";
 import { CommentService } from "./comment.service";
 import { UpdateCommentDto } from "./dto/update.dto";
 import { JwtAuthGuard } from "../auth/jwtAuthGuard/jwtAuthGuard";
 import { CreateCommentDto } from "./dto/create.dto";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { NotificationService } from "../notification/notification.service";
+import { PostService } from "../posts/post.service";
 
 
 @ApiBearerAuth()
@@ -11,7 +13,11 @@ import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 @Controller('api/v1/comments')
 export class CommentController {
 
-    constructor(private readonly commentService: CommentService) {}
+    constructor(
+        private readonly commentService: CommentService,
+        private readonly notificationService: NotificationService,
+        private readonly postService: PostService,
+    ) {}
 
     @Get()
     @UseGuards(JwtAuthGuard)
@@ -37,6 +43,18 @@ export class CommentController {
         const user = req['user'];
         const idUser = user.idUser;
         const comment = await this.commentService.createdComment(createCommentDto, idUser);
+
+        //lấy post từ comment
+        const post = await this.postService.findOne(comment.post.idPost);
+        
+        if (!post) {
+            throw new NotFoundException('Không tìm thấy bài viết');
+        }
+
+        //tạo thông báo khi có bình luận
+        await this.notificationService.createCommentNotification(post, comment, user);
+
+
         return res.status(200).json({
             status: 'success',
             message: 'create comment successfully',

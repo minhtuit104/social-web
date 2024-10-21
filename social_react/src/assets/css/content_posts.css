@@ -13,7 +13,6 @@
 }
 
 .posts .post-header{
-    margin-bottom: 20px;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -22,6 +21,13 @@
 
 .posts .post-header .nav-post {
     display: flex;
+}
+.posts .post-header .nav-post .post-profile-image{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover;
 }
 
 .posts .post-header .post-info h3{

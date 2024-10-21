@@ -10,6 +10,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 import { fectchUserName } from "../services/UserService";
+import ModalNotification from "../components/modal_notification";
 
 const NavBar = () => {
 
@@ -18,6 +19,13 @@ const NavBar = () => {
     const [userName, setUserName] = useState<string | null>(null);
     const [emailInfo, setEmailInfo] = useState<string | null>(null);
     const [avarta, setAvarta] = useState<string | null>(null);
+    const [notifications, setNotifications] = useState<any[]>([]);//danh sách thông báo
+    const [showModalNotification, setShowModalNotification] = useState(false);//hiển thị modal thông báo
+
+    //hàm hiển thị đóng mở modal thông báo
+    const toggleModalNotification = () => {
+        setShowModalNotification(!showModalNotification);
+    }
 
 
     //hàm giải mã token
@@ -38,7 +46,7 @@ const NavBar = () => {
           return JSON.parse(jsonPayload);
         }
         return null;
-      };
+    };
 
     //kết nổi từ idUser lấy ra từ token để hiển thị UserName
     const user = getUserFromToken();
@@ -48,7 +56,6 @@ const NavBar = () => {
         if(idUser){
             try {
                 const userData = await fectchUserName(idUser);
-                console.log("userData---------->: ", userData);
                 if(userData){
                 setUserName(userData.name);
                 setEmailInfo(userData.email);
@@ -60,7 +67,7 @@ const NavBar = () => {
         }
     };
     getUser();
-    },[idUser])
+    },[idUser]);
 
 
 //------------------------
@@ -89,9 +96,9 @@ const NavBar = () => {
         <nav>
             <ul>
                 <li className={activeTab === "new-feed" ? "active" : ""}><a href="/home"><img src={IconNew} alt="" className="ic-22" />News Feed</a></li>
-                <li><a href="/messager"><img src= {IconMessage} alt="" className="ic-22" />Messages</a><span className="quantity">9</span></li>
+                <li><a href="/home/messager"><img src= {IconMessage} alt="" className="ic-22" />Messages</a><span className="quantity">9</span></li>
                 <li><a href="/friends"><img src= {IconFriend} alt="" className="ic-22" />Friends</a><span className="quantity">9</span></li>
-                <li><a href="/notifications"><img src= {IconNotting} alt="" className="ic-22" />Notifications</a><span className="quantity">9</span></li>
+                <li><a href="#" onClick={toggleModalNotification}><img src= {IconNotting} alt="" className="ic-22" />Notifications</a><span className="quantity">9</span></li>
                 <li>
                     <img src= {IconSetting} className="ic-22 icSetting" alt="Settings" />
                     <NavDropdown title="Settings" className="DropdownSetting" style={{marginLeft: '-13px'}}>
@@ -103,7 +110,11 @@ const NavBar = () => {
         </nav>  
                      
     </div>
-
+    {showModalNotification && (
+        <ModalNotification 
+        show={showModalNotification} 
+        handleClose={toggleModalNotification} />
+    )}
     </>);
 }
 

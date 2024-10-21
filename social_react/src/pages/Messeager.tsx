@@ -5,7 +5,7 @@ import ChatOnline from "../components/chatOnline/ChatOnline";
 import Conversation from "../components/Conversation/Conversation";
 import Message from "../components/message/Message";
 import NavbarMessager from "../components/navbarMessager/NavbarMessager";
-import { fetchAllUser } from "../services/UserService";
+import { fectchUserName, fetchAllUser } from "../services/UserService";
 import { useWebSocket } from "../WebSocket/WebSocketProvider";
 import { getMessageWithUser } from "../services/MessageService";
 
@@ -38,10 +38,20 @@ const Messeager = () => {
     const [selectedUserInfo, setSelectedUserInfo] = useState<any>(null); //lưu thông tin của người nhận
     const [message, setMessage] = useState<any[]>([]); //lưu message
     const [newMessage, setNewMessage] = useState<string>(''); //lưu message mới
+    const [avarta, setAvarta] = useState<string | null>(null);
 
     const userInfo = getUserFromToken();
     const currentUserId = userInfo?.idUser;
 
+    useEffect(() => {
+        const getUser = async () => {
+            if (currentUserId) {
+                const userData = await fectchUserName(currentUserId);
+                setAvarta(userData?.avarta);
+            }
+        };
+        getUser();
+    }, [currentUserId]);
 
     const sendMessage = () => {
         if(selectedUserId && newMessage.trim() && socket?.connected){
@@ -56,7 +66,7 @@ const Messeager = () => {
                 {
                     content: newMessage,
                     own: true,
-                    avarta: userInfo?.avarta ?? 'https://www.gravatar.com/avatar/?d=mp',
+                    avarta: avarta ?? 'https://www.gravatar.com/avatar/?d=mp',
                     time : new Date().toISOString(),
                 },
             ]);
@@ -83,20 +93,7 @@ const Messeager = () => {
             socket?.off('receiveMessage');
         };     
     }
-    }, [socket]);
-
-    //khi user tham gia room
-    useEffect(() => {
-        if (socket && socket.connected && currentUserId) {
-            // Gửi sự kiện joinRoom khi socket kết nối
-            socket.emit('joinRoom', currentUserId);
-    
-            // Cleanup khi component unmount hoặc khi socket ngắt kết nối
-            return () => {
-                socket.emit('leaveRoom', currentUserId); // Hoặc xử lý logic rời khỏi room nếu cần
-            };
-        }
-    }, [socket, currentUserId]);
+    }, [socket, selectedUserId]);
     
     //gọi API lấy danh sách user
     useEffect(() => {
@@ -108,7 +105,6 @@ const Messeager = () => {
             const res = await fetchAllUser();
             if(res && res.data){
                 setUser(res.data);
-                console.log("Danh sách user:", res.data);
             } else {
                 console.error("No user data not found");
             }
@@ -120,11 +116,10 @@ const Messeager = () => {
     //hàm chọn người nhận
     const handleSelectUserId = async (idUser: number) => {
         setSelectedUserId(idUser);
-        console.log("idUser người nhận---------->: ", selectedUserId);
+        console.log("idUser người nhận---------->: ", idUser);
         //lấy thông tin người nhận
         const selectUser = user.find((user: any) => user.idUser === idUser);
         setSelectedUserInfo(selectUser);
-        // console.log("selectUserInfo---------->: ", selectUser);
         try {
             const res = await getMessageWithUser(currentUserId, idUser);
             // console.log("res---------->: ", res?.data);
