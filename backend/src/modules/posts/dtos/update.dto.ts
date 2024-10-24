@@ -6,19 +6,19 @@ export class UpdatePostDto {
     // idPost: number;
     @ApiProperty()
     @IsNotEmpty({message: 'title không được để trống'})
-    title: string;
+    title?: string;
 
     @ApiProperty()
-    image: string;
+    image?: string;
 
     @ApiProperty()
     @IsNotEmpty({message: 'privacy không được để trống'})
-    privacy: string;
+    privacy?: string;
 
     @ApiProperty()
-    totalEmotion: number;
+    totalEmotion?: number;
     
     @ApiProperty()
-    totalComment: number;
+    totalComment?: number;
 
 }

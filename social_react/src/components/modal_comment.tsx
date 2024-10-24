@@ -1,5 +1,4 @@
-import ImgTu from "../assets/images/tu.jpg";
-import ImgLuan from "../assets/images/luan.jpg";
+
 import IconSend from "../assets/images/icons/ic_send.svg";
 import { Modal, Button } from "react-bootstrap";
 import "../assets/css/modal_comment.css";
@@ -30,15 +29,23 @@ const getUserFromToken = () => {
     return null;
   };
 
+  interface ModalCommentProps {
+    show: boolean;
+    idPost: number;
+    handleClose: () => void;
+    updateCommentCount: (postId: number, newCount: number) => void;
+}
 
-const ModalComment = (props: any) => {
-    const {show, handleClose, idPost} = props;
+
+const ModalComment: React.FC<ModalCommentProps> = ({show, idPost, handleClose, updateCommentCount}) => {
+    // const {show, handleClose, idPost, updateCommentCount} = props;
     const [comments, setComments] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [newComment, setNewComment] = useState('');
     const [newSubComment, setNewSubComment] = useState('');
     const [commentId, setCommentId] = useState<number | null>(null);
     const [user, setUser] = useState<any>(null);
+    const [totalComment, setTotalComment] = useState<number>(0);
     const socket = useWebSocket();
 
     const userInfo = getUserFromToken();
@@ -54,28 +61,49 @@ const ModalComment = (props: any) => {
         getUser();
     }, [idUser]);
 
+    //hàm fetch comment lấy ra tất cả comment của post
     useEffect(() =>{
-
         const fetchComments = async () =>{
-            if(idPost){
-                setLoading(true);
-                console.log('Select post ID: ', idPost);
-                try {
-                    const data = await fetchCommentsById(idPost);
-                    setComments(data);
-                } catch (error) {
-                    console.error('Error fetching comments:', error);
-                }finally{
-                    setLoading(false);
-                }
+            if(!idPost) return;
+
+            setLoading(true);
+            console.log('Select post ID: ', idPost);
+            try {
+                const datat = await fetchCommentsById(idPost);
+                setComments(datat);
+            } catch (error) {
+                console.error('Error fetching comments:', error);
+            }finally{
+                setLoading(false);
             }
         }
         fetchComments();
     }, [idPost]);
 
+    //hàm xử lý sự kiện cập nhật số lượng bình luận của post
+    useEffect(() => {
+        if(socket){
+            //lắng nghe sự kiện updateTotalComment
+            socket.on('updateTotalComment', (data) => {
+                if(data.postId === idPost){
+                    //cập nhật lại totalComment
+                    setTotalComment(data.totalComment);
+                    console.log("totalComment: ", data.totalComment);
+                }
+            });
+        }
+
+        return () => {
+            if(socket){
+                socket.off('updateTotalComment');
+            }
+        }
+    }, [socket, idPost]);
+
+    //hàm create comment và gọi thông báo sự kiện khi có bình luận mới
     const handleAddComment = async () => {
         if(!newComment.trim()){
-            console.log('Please enter a comment before submitting');
+            alert('Please enter a comment before submitting');
             return;
         }
         try {
@@ -104,15 +132,7 @@ const ModalComment = (props: any) => {
             };
 
             setComments([...comments, newCommentWithSubcomments]); // Thêm comment mới vào danh sách
-            // const newCommentWithSubcomment ={
-            //     ...data.data,
-            //     subComments: [],
-            // }
-            // setComments([...comments, newCommentWithSubcomment]); //thêm comment mới vào danh sách
             setNewComment(''); // reset input sao khi gửi comment
-
-            
-
         } catch (error) {
             console.error('Error adding comment:', error);
         }
@@ -123,7 +143,7 @@ const ModalComment = (props: any) => {
         setCommentId(idComment);    
     }
 
-    //hàm create
+    //hàm create sub-comment
     const handleAddSubcomment = async (idComment: number) =>{
         if(!newSubComment.trim()){
             console.log('Please enter a sub-comment before submitting');
@@ -157,11 +177,20 @@ const ModalComment = (props: any) => {
             console.error('Error adding sub-comment:', error);
         }
     }
+    
+
+    //hàm cập nhật số lượng bình luận của post
+    const handleCloseAndUpdate = () => {
+        if (updateCommentCount) {
+            updateCommentCount(idPost, comments.length);
+        }
+        handleClose();
+    };
 
 
     return (
         <>
-        <Modal show={show} onHide={handleClose} centered size="lg">
+        <Modal show={show} onHide={handleCloseAndUpdate} centered size="lg">
             <Modal.Header closeButton>
             <Modal.Title style={{ display: 'flex', justifyContent: 'center', width: '100%'}}>Comments</Modal.Title>
             </Modal.Header>
@@ -171,7 +200,7 @@ const ModalComment = (props: any) => {
                         <p>Loading comments...</p>
                     ): comments.length > 0 ? (
                         comments.map((comment: any) => (
-                            <div key={comment.idComment}>                   
+                            <div key={`comment-${comment.idComment}`}>                   
                                 <CommentParent
                                 author={comment.user.name}
                                 comment={comment.comment}
@@ -179,7 +208,7 @@ const ModalComment = (props: any) => {
                                 avarta={comment.user.avarta ?? 'https://www.gravatar.com/avatar/?d=mp'}
                                 idComment={comment.idComment}
                                 onReplyClick={handleShowIdComment}
-                            />
+                                />
                                 {/* Hiển thị form nhập sub-comment*/}
                                 {commentId === comment.idComment && (                                  
                                     <div className="subcomment-input">
@@ -202,7 +231,7 @@ const ModalComment = (props: any) => {
                                     <div className="subcomments">
                                         {comment.subComments.map((subComment: any) => (
                                             <CommentChild
-                                            key={subComment.idSubcomment}
+                                            key={`subComment-${subComment.idSubcomment}`}
                                             author={subComment.user.name}
                                             subcomment={subComment.subcomment}
                                             createdAt={subComment.createdAt}

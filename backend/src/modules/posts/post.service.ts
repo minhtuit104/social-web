@@ -25,28 +25,15 @@ export class PostService{
     async findOne(id: number){
         const post = await this.postRepository.findOne({
             where: {idPost: id},
+            cache: false,
             relations: ['authorId']
         });
 
         if(!post){
             throw new Error('Post not found');
         }
-        return plainToInstance(Post, post);
+        return post;
     }
-
-    // Hàm lấy authorId dựa trên postId
-    // async getAuthorIdByPostId(postId: number){
-    //     const post = await this.postRepository.findOne({
-    //         where: { idPost: postId },
-    //         relations: ['authorId'], // Giả sử có quan hệ với 'author'
-    //     });
-
-    //     if (!post) {
-    //     throw new Error('Post not found');
-    //     }
-
-    //     return post.authorId.idUser; // Trả về id của tác giả
-    // }
 
     async remove(id: number){
         const post = await this.findOne(id);

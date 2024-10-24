@@ -19,6 +19,8 @@ import { Messager } from './typeorm/entities/Messager';
 import { GatewayModule } from './modules/gateway/gateway.module';
 import { Notification } from './typeorm/entities/Notification';
 import { NotificationModule } from './modules/notification/notification.module';
+import { Emotion } from './typeorm/entities/Emotion';
+import { EmotionModule } from './modules/emotion/emotion.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -29,7 +31,7 @@ import { NotificationModule } from './modules/notification/notification.module';
       host: "localhost",
       type: "mysql",
       autoLoadEntities: true,
-      entities: [User,Account, Post, Comment, SubComment, Messager, Notification],
+      entities: [User,Account, Post, Comment, SubComment, Messager, Notification, Emotion],
       synchronize: true,
     }),
     AuthModule,
@@ -41,6 +43,7 @@ import { NotificationModule } from './modules/notification/notification.module';
     MessagerModule,
     GatewayModule,
     NotificationModule,
+    EmotionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

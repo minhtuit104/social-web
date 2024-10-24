@@ -15,6 +15,7 @@ import { CommentService } from '../comment/comment.service';
 import { PostService } from '../posts/post.service';
 import { NotificationService } from '../notification/notification.service';
 import { UserService } from '../users/user.service';
+import { EmotionService } from '../emotion/emotion.service';
 
 @WebSocketGateway({
   cors: {
@@ -32,6 +33,7 @@ export class MyGateway implements OnGatewayConnection, OnGatewayDisconnect{
     private readonly postService: PostService,
     private readonly notificationService: NotificationService,
     private readonly userService: UserService,
+    private readonly emotionService: EmotionService,
   ) {}
 
   // Hàm này sẽ được gọi khi client kết nối
@@ -84,32 +86,105 @@ export class MyGateway implements OnGatewayConnection, OnGatewayDisconnect{
     @ConnectedSocket() client: Socket
   ) {
       const idUser = client.data.idUser;
-      //gọi service để lưu bình luận
-      const newComment = await this.commentService.createdComment({
-        idPost: data.idPost,
-        comment: data.comment
+
+      try{
+        //1. Gọi service để lưu bình luận 
+        const newComment = await this.commentService.createdComment({
+          idPost: data.idPost,
+          comment: data.comment
+        }, idUser);
+
+        //2. Lấy thông tin  người dùng tù bài viết
+        const user = await this.userService.findOne(idUser);
+        //lấy thông tin bài viết
+        let post = await this.postService.findOne(data.idPost);
+        //lấy số lượng bình luận của bài viết
+        const commentCount = await this.commentService.countCommentByPost(post.idPost);
+        //cập nhật số totalComment của bài viết
+        const updatedPost = await this.postService.update(post.idPost, {totalComment: commentCount});
+        console.log("totalComment sau khi cập nhật: ", updatedPost.totalComment);
+        //3. Tạo thông báo khi có bình luận mới
+        await this.notificationService.createCommentNotification(post, newComment, user);
+
+        //4. Gửi thông báo bình luận tới tác giả bài viết
+        const postAuthorSocket = this.getSocketByUserId(post.authorId.idUser);
+        if(postAuthorSocket){
+          this.server.to(postAuthorSocket.id).emit('receiveNewComment', {
+            postId: data.idPost,
+            comment: data.comment,
+            author: newComment.user.name
+          });
+        }else{
+          console.log(`Không tìm thấy socket của người dùng ${post.authorId.idUser}`);
+        }
+        
+        //5. Gửi sự kiện cập nhật totalComment đến tất cả các client
+        this.server.emit('updateTotalComment', {
+          postId: post.idPost,
+          totalComment: post.totalComment
+        });
+      
+
+        return newComment;
+      }catch(error){
+        console.error('Error in handleNewComment: ', error);
+        throw new Error('Failed to handle new comment');
+      }
+  }
+
+  // bắt sự kiện khi người dùng thêm cảm xúc
+  @SubscribeMessage('addEmotion')
+  async handleAddEmotion(
+    @MessageBody() data: { idPost: number, emotion: string },
+    @ConnectedSocket() client: Socket
+  ) {
+    const idUser = client.data.idUser;
+
+    try{
+      const newEmotion = await this.emotionService.addOrUpdateEmotion({
+        idPost: data.idPost, 
+        emotion: data.emotion
       }, idUser);
 
-      //lấy user từ idUser
+      //lấy thông tin người dùng từ bài viết
       const user = await this.userService.findOne(idUser);
-      // Lấy thông tin bài viết
+      //lấy thông tin bài viết
       const post = await this.postService.findOne(data.idPost);
+      //lấy số lượng cảm xúc của bài viết
+      const emotionCount = await this.emotionService.countEmotionsByPost(post.idPost);
 
-      // Tạo thông báo khi có bình luận mới
-      await this.notificationService.createCommentNotification(post, newComment, user);
+      //cập nhật số lượng cảm xúc của bài viết
+      const updatedPost = await this.postService.update(post.idPost, {totalEmotion: emotionCount});
+      console.log("totalEmotion sau khi cập nhật: ", updatedPost.totalEmotion);
 
-      //phát sự kiện 'newComment' đến người dùng liên quan
-      const postAuthorId = await this.postService.findOne(data.idPost);
-      //gửi thông báo bình luận tới tác giả bài viết
-      const postAuthorSocket = this.getSocketByUserId(postAuthorId.authorId.idUser);
+      //tạo thông báo khi có cảm xúc mới
+      await this.notificationService.createEmotionNotification(post, newEmotion, user);
+
+      //gửi sự kiện cập nhật số lượng cảm xúc đến tất cả các client
+      const postAuthorSocket = this.getSocketByUserId(post.authorId.idUser);
       if(postAuthorSocket){
-        this.server.to(postAuthorSocket.id).emit('receiveNewComment', {
+        this.server.to(postAuthorSocket.id).emit('receiveNewEmotion', {
           postId: data.idPost,
-          comment: data.comment,
-          author: newComment.user.name
+          emotion: data.emotion,
+          author: newEmotion.user.name
         });
+      }else{
+        console.log(`Không tìm thấy socket của người dùng ${post.authorId.idUser}`);
       }
-      return newComment;
+
+      //gửi sự kiện cập nhật số lượng cảm xúc đến tất cả các client
+      this.server.emit('updateTotalEmotion', {
+        postId: post.idPost,
+        totalEmotion: post.totalEmotion
+      });
+
+      return newEmotion;
+
+
+    }catch(error){
+      console.error('Error in handleAddEmotion: ', error);
+      throw new Error('Failed to handle add emotion');
+    }
   }
 
   //lấy socket theo id người dùng theo idUser

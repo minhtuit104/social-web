@@ -2,6 +2,7 @@ import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } f
 import { User } from "./User";
 import { Post } from "./Post";
 import { Comment } from "./Comment";
+import { Emotion } from "./Emotion";
 @Entity('notifications')
 export class Notification {
     @PrimaryGeneratedColumn()
@@ -16,12 +17,16 @@ export class Notification {
     sender: User;
 
     //nếu thông báo liên quan đến bài viết
-    @ManyToOne(() => Post, {nullable: true})
+    @ManyToOne(() => Post, {nullable: true, onDelete: 'CASCADE'})
     post: Post;
 
     //nếu thông báo liên quan đến bình luận
-    @ManyToOne(() => Comment, {nullable: true})
+    @ManyToOne(() => Comment, {nullable: true, onDelete: 'CASCADE'})
     comment: Comment;
+
+    //nếu thông báo liên quan đến cảm xúc
+    @ManyToOne(() => Emotion, {nullable: true, onDelete: 'CASCADE'})
+    emotion: Emotion;
     
     //nội dung thông báo
     @Column('text')

@@ -4,7 +4,7 @@ import FeedPage from "./FeedPage";
 import "../assets/css/home_page.css";
 import { useWebSocket } from "../WebSocket/WebSocketProvider";
 import ChatNotificationModal from "../components/chatNotificationModal/ChatNotificationModal";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { toast } from "react-toastify";
 const HomePage = () => {
     const socket = useWebSocket();
@@ -24,10 +24,17 @@ const HomePage = () => {
             toast.info(`${data.author} đã bình luận vào bài viết của bạn`);
           });
 
+          socket.on('receiveNewEmotion', (data) => {
+            console.log('Nhận được cảm xúc mới: ', data);
+            //hiển thị thông báo cảm xúc mới
+            toast.info(`${data.author} đã bày tỏ cảm xúc về bài viết của bạn`);
+          });
+
         }
 
         return () => {
           socket?.off('receiveNewComment');
+          socket?.off('receiveNewEmotion');
         };
       }, [socket]);
       

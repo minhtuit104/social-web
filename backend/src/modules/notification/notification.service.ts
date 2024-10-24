@@ -5,6 +5,7 @@ import { User } from "../../typeorm/entities/User";
 import { Notification } from "../../typeorm/entities/Notification";
 import { Post } from "../../typeorm/entities/Post";
 import { Comment } from "../../typeorm/entities/Comment";
+import { Emotion } from "src/typeorm/entities/Emotion";
 
 @Injectable()
 export class NotificationService {
@@ -27,6 +28,24 @@ export class NotificationService {
         notification.comment = comment; //bình luận liên quan
         notification.sender = currentUser; //người gửi bình luận
         notification.message = `${currentUser.name} đã bình luận vào bài viết của bạn`;
+        notification.isRead = false;
+
+        //lưu thông báo vào cơ sở dữ liệu
+        return await this.notificationRepository.save(notification);
+    }
+
+    //tạo thông báo khi có lượt bày tỏ cảm xúc
+    async createEmotionNotification(post: Post, emotion: Emotion, currentUser: User): Promise<Notification> {
+        // Kiểm tra xem post và post.author có tồn tại không
+        if (!post || !post.authorId) {
+            throw new Error('Post hoặc author không tồn tại');
+        }
+        const notification = new Notification();
+        notification.receiver = post.authorId; //người nhận thông báo
+        notification.post = post; //bài viết liên quan
+        notification.emotion = emotion; //cảm xúc liên quan
+        notification.sender = currentUser; //người gửi cảm xúc
+        notification.message = `${currentUser.name} đã ${emotion.emotion} bài viết của bạn`;
         notification.isRead = false;
 
         //lưu thông báo vào cơ sở dữ liệu

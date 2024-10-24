@@ -12,6 +12,7 @@ import { NotificationModule } from "../notification/notification.module";
     imports: [TypeOrmModule.forFeature([Comment, User, Post]), PostModule, NotificationModule],
     controllers: [CommentController],
     providers: [CommentService],
+    exports: [CommentService]
 })
 
 export class CommentModule {};

@@ -52,7 +52,30 @@ export class CommentService{
             post,
             user,
         });
+
+        //Cập nhật số lượng bình luận của post
+        post.totalComment = await this.commentRepository.count({where: {post: {idPost: idPost}}});
+        await this.postsRepository.save(post);
         return this.commentRepository.save(newComment);
+    }
+
+    //hàm đếm số lượng bình luận của post
+    async countCommentByPost(idPost: number){
+        const [comments, commentCount] = await this.commentRepository.findAndCount({
+            where: { post: { idPost: idPost } },
+            relations: ['subComments'],
+        });
+        // console.log("Danh sách bình luận: ", comments);
+        // console.log("Số lượng bình luận chính: ", commentCount);
+        const subCommentCount = comments.reduce((acc, comment) => {
+            // console.log(`Bình luận con của ${comment.idComment}: `, comment.subComments);
+            return acc + (comment.subComments?.length || 0);
+        }, 0);
+        // console.log("Số lượng bình luận con: ", subCommentCount);
+
+        const totalCommentCount = commentCount + subCommentCount;
+        // console.log("Tổng số lượng bình luận: ", totalCommentCount);
+        return totalCommentCount;
     }
 
  

@@ -5,6 +5,7 @@ import { Comment } from "./Comment";
 import { SubComment } from "./SubComment";
 import { Messager } from "./Messager";
 import { Notification } from "./Notification";
+import { Emotion } from "./Emotion";
 //tên bảng
 @Entity({ name: 'user'})
 export class User {
@@ -41,6 +42,9 @@ export class User {
 
     @OneToMany(() => Comment, comment => comment.user)
     comments: Comment[];
+
+    @OneToMany(() => Emotion, emotion => emotion.user)
+    emotions: Emotion[];
 
     @OneToMany(() => SubComment, subcomment  => subcomment .user)
     subComments: SubComment[];

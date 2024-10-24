@@ -78,6 +78,7 @@
     height: 50px;
     margin-right: 10px;
     border-radius: 50%;
+    object-fit: cover;
 }
 .modal-footer .modal-footer-input{
     display: flex;
