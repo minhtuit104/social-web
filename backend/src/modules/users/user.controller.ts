@@ -16,8 +16,13 @@ export class UserController{
 
     @Get()
     @UseGuards(JwtAuthGuard)
-    findAll(){
-        return this.userService.findAll();
+    async findAll(@Response() res){
+        const users = await this.userService.findAll();
+        return res.status(200).json({
+            status: 'success',
+            message: 'Users retrieved successfully',
+            data: users,
+          });
     }
 
     @Get('/:id')

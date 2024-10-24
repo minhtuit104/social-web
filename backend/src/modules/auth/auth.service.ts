@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { CreateUserDto } from "../users/dtos/create.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "src/typeorm/entities/User";
@@ -27,7 +27,7 @@ export class AuthService{
         const findUserByEmail = await this.userRepository.findOne({where: {email: createUserDto.email}});
         //kiểm tra
         if(findUserByEmail){
-            throw new HttpException('idUser hoặc email đã tồn tại', 400);
+            throw new HttpException('Email đã tồn tại', 400);
         }else{
             //tạo ra một đối tượng user
             const newUser: CreateUserDto = {
@@ -55,43 +55,37 @@ export class AuthService{
 
     }
 
-    async login(loginDto: LoginDto){
-        //Kiểm tra email có tồn tại trong db không?
-        const findUserByEmail = await this.accountReponsetory.findOne({where: {email: loginDto.email}});
-        if(!findUserByEmail){
-            throw new HttpException("Account not registered", 400);
-        } else{
-            //Hash password
-            const comparePassword =  bcrypt.compareSync(
-                loginDto.password,
-                findUserByEmail.password,
-            );
+    async login(loginDto: LoginDto) {
+        const findUserByEmail = await this.accountReponsetory.findOne({ where: { email: loginDto.email } });
+        if (!findUserByEmail) {
+            throw new HttpException("Tài khoản chưa được đăng ký", HttpStatus.BAD_REQUEST);
+        }
 
-            if(!comparePassword){
-                throw new HttpException('Password is incorrect!!', 400);
-            } else{
-                //dữ liệu + acces_token
-                const payload = {
-                    idAccount: findUserByEmail.idAccount,
-                    idUser: findUserByEmail.idUser,
-                    email: findUserByEmail.email,
-                    role: findUserByEmail.role,
-                };
+        const isPasswordValid = await bcrypt.compare(loginDto.password, findUserByEmail.password);
+        if (!isPasswordValid) {
+            throw new HttpException('Mật khẩu không chính xác!', HttpStatus.BAD_REQUEST);
+        }
 
-                const access_token = await this.jwtService.signAsync(payload);
-                const refresh_token =  await this.jwtService.signAsync(payload,{
-                    secret: 'THISISSECRETKEY',
-                    expiresIn: '1d' 
-                })
-                findUserByEmail.refreshToken = refresh_token;
-                await this.accountReponsetory.save(findUserByEmail);
+        const payload = {
+            idAccount: findUserByEmail.idAccount,
+            idUser: findUserByEmail.idUser,
+            email: findUserByEmail.email,
+            role: findUserByEmail.role,
+        };
 
-                const { password, ...userData } = findUserByEmail; // Loại bỏ password nếu khi trả về
+        const [access_token, refresh_token] = await Promise.all([
+            this.jwtService.signAsync(payload),
+            this.jwtService.signAsync(payload, {
+                secret: 'THISISSECRETKEY',
+                expiresIn: '1d'
+            })
+        ]);
 
-                return {...userData, access_token};
-                    
-                
-            }
-        }          
+        findUserByEmail.refreshToken = refresh_token;
+        await this.accountReponsetory.save(findUserByEmail);
+
+        const { password, ...userData } = findUserByEmail;
+
+        return { ...userData, access_token };
     }
 }

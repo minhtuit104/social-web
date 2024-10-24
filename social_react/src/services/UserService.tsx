@@ -15,21 +15,36 @@ const fectchUserName = async (idUser: number) => {
         console.error('Token is missing');
         return;
     }
-
     try {
-
         const response =  await axios.get(`/api/v1/users/${idUser}`, {
             headers: {
                 Authorization: `Bearer ${token}` 
             },
         });
         return response.data;
-
     } catch (error) {
         console.error('Error creating post:', error);
         throw error;
     }
 };
 
+const fetchAllUser = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.error('Token is missing');
+        return;
+    }
+    try {
+        return await axios.get('/api/v1/users', {
+            headers: {
+                Authorization: `Bearer ${token}` 
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching all users:', error);
+        throw error;
+    }
+}
 
-export {loginApi, registerApi, fectchUserName};
+
+export {loginApi, registerApi, fectchUserName, fetchAllUser};

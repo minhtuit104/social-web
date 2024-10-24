@@ -13,15 +13,21 @@
 }
 
 .posts .post-header{
-    margin-bottom: 20px;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    
+    margin-bottom: 10px;
 }
 
 .posts .post-header .nav-post {
     display: flex;
+}
+.posts .post-header .nav-post .post-profile-image{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover;
 }
 
 .posts .post-header .post-info h3{
@@ -29,8 +35,8 @@
     font-weight: 700;
 }
 
-.posts .post-header .post-info p{
-    font-size: 16px;
+.posts .post-header .post-info span{
+    font-size: 14px;
     font-weight: 500;
     color: var(--black8);
     display: flex;
@@ -114,15 +120,48 @@
 
 .post-images .image-container{
     position: relative;
+    width: 90%;
+}
+
+.post-images .image-container.single-image img{
+    width: 100%;
+    max-height: 450px;
+    object-fit: cover;
+    border-radius: 14px;
+}
+.post-images .image-container.two-image{
+    display: flex;
+    gap: 10px;
+}
+.post-images .image-container.two-image img{
+    width: 50%;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 14px;
+}
+.post-images .image-container.three-image{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.post-images .image-container.three-image img:first-child{
+    grid-column: 1 / -1;
+    height: 300px;
+}
+.post-images .image-container.three-image img{
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 14px;
 }
 .small-image{   
     border-radius: 14px;
-    width: 200px;
+    width: 180px;
     height: 300px;
     object-fit: cover;
 }
 .large-image {
-    width: 375px; 
+    width: 275px; 
     height: 300px; 
     object-fit: cover;
     border-radius: 14px;
@@ -152,8 +191,10 @@
 .post-footer .like-comment {
     display: flex;
     align-items: center;
-    position: relative;
     width: 80%;
+}
+.emotion-container{
+    position: relative;
 }
 .ic-like-comment{
     width: 28px;
@@ -163,39 +204,40 @@
     display: flex;
     align-items: center;
     margin-right: 20px;
+    cursor: pointer;
 }
 .post .post-footer .like-comment span {
     font-size: 16px;
     font-weight: 500;
 }
 .post-footer .like-comment .feeling-options{
-    display: none;
+    display: flex;
     position: absolute;
-    top: -48px;
+    bottom: 100%;
     left: 0;
     background-color: white;
     border-radius: 50px;
     padding: 4px;
     align-items: center;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
-.post-footer .like-comment .feeling-options .feeling-icon{
+/* .main-reaction:hover .feeling-options{
+    display: flex;
+} */
+.feeling-icon{
+    transition: transform 0.2s;
     width: 30px;
     height: 30px;
     margin: 0 3px;
 }
-.post-footer .main-reaction:hover .feeling-options{
-    display: flex;
+.feeling-icon:hover{
+    transform: scale(1.2);
 }
+
 .post-footer .like-comment .comment-btn{
     border: none;
     background: none;
 }
-.post-footer .like-comment .feeling-options .feeling-icon:hover{
-    width: 45px;
-    height: 45px;
-}
-
 .posts .post .post-footer .like-comment img{
     cursor: pointer;
 }

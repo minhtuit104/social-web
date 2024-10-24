@@ -10,6 +10,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 import { fectchUserName } from "../services/UserService";
+import ModalNotification from "../components/modal_notification";
 
 const NavBar = () => {
 
@@ -18,6 +19,13 @@ const NavBar = () => {
     const [userName, setUserName] = useState<string | null>(null);
     const [emailInfo, setEmailInfo] = useState<string | null>(null);
     const [avarta, setAvarta] = useState<string | null>(null);
+    const [notifications, setNotifications] = useState<any[]>([]);//danh sách thông báo
+    const [showModalNotification, setShowModalNotification] = useState(false);//hiển thị modal thông báo
+
+    //hàm hiển thị đóng mở modal thông báo
+    const toggleModalNotification = () => {
+        setShowModalNotification(!showModalNotification);
+    }
 
 
     //hàm giải mã token
@@ -38,28 +46,30 @@ const NavBar = () => {
           return JSON.parse(jsonPayload);
         }
         return null;
-      };
+    };
 
     //kết nổi từ idUser lấy ra từ token để hiển thị UserName
     const user = getUserFromToken();
-        const idUser = user?.idUser;
-        useEffect(() => {
-        const getUser = async () =>{
-            if(idUser){
-                try {
-                    const userData = await fectchUserName(idUser);
-                    if(userData && userData.name && userData.email && userData.avarta){
-                    setUserName(userData.name);
-                    setEmailInfo(userData.email);
-                    setAvarta(userData.avarta);
+    const idUser = user?.idUser;
+    useEffect(() => {
+    const getUser = async () =>{
+        if(idUser){
+            try {
+                const userData = await fectchUserName(idUser);
+                if(userData){
+                setUserName(userData.name);
+                setEmailInfo(userData.email);
+                setAvarta(userData.avarta);
             }
             } catch (error) {
-            console.error('Failed to fetch user name:', error);
+                console.error('Failed to fetch user name:', error);
             }
-            }
-        };
-        getUser();
-    },[idUser])
+        }
+    };
+    getUser();
+    },[idUser]);
+
+
 //------------------------
     useEffect(() => {
         if(location.pathname === "/home"){
@@ -78,17 +88,17 @@ const NavBar = () => {
     <div className="nav-side-bar">
         <div className="profile">
             <div className="profile-image">
-                <img src={Avartar} alt="Profile Image" />
+                <img src={avarta ?? 'https://www.gravatar.com/avatar/?d=mp' } alt="Profile Image" />
             </div>
-            <h3>{userName}</h3>
-            <p>{emailInfo}</p>
+            <h3>{userName ?? 'Loading...'}</h3>
+            <p>{emailInfo ?? 'Loading...'}</p>
         </div>
         <nav>
             <ul>
-                <li className={activeTab === "new-feed" ? "active" : ""}><a href="/home"><img src={IconNew} className="ic-22" />News Feed</a></li>
-                <li><a href="/message"><img src= {IconMessage} className="ic-22" />Messages</a><span className="quantity">9</span></li>
-                <li><a href="/friends"><img src= {IconFriend} className="ic-22" />Friends</a><span className="quantity">9</span></li>
-                <li><a href="/notifications"><img src= {IconNotting} className="ic-22" />Notifications</a><span className="quantity">9</span></li>
+                <li className={activeTab === "new-feed" ? "active" : ""}><a href="/home"><img src={IconNew} alt="" className="ic-22" />News Feed</a></li>
+                <li><a href="/home/messager"><img src= {IconMessage} alt="" className="ic-22" />Messages</a><span className="quantity">9</span></li>
+                <li><a href="/friends"><img src= {IconFriend} alt="" className="ic-22" />Friends</a><span className="quantity">9</span></li>
+                <li><a href="#" onClick={toggleModalNotification}><img src= {IconNotting} alt="" className="ic-22" />Notifications</a><span className="quantity">9</span></li>
                 <li>
                     <img src= {IconSetting} className="ic-22 icSetting" alt="Settings" />
                     <NavDropdown title="Settings" className="DropdownSetting" style={{marginLeft: '-13px'}}>
@@ -100,7 +110,11 @@ const NavBar = () => {
         </nav>  
                      
     </div>
-
+    {showModalNotification && (
+        <ModalNotification 
+        show={showModalNotification} 
+        handleClose={toggleModalNotification} />
+    )}
     </>);
 }
 

@@ -10,9 +10,9 @@ const Contacts = () => {
                 <div className="contacts">
                     <h3>Contacts</h3>
                     <ul>
-                        <li><a href="#"><img src={ImgPf1} className="img-contact"/>Tạ Minh Tú</a></li>
-                        <li><a href="#"><img src={ImgPf2} className="img-contact"/>Trần Công Đoàn</a></li>
-                        <li><a href="#"><img src={ImgPf3} className="img-contact"/>Nguyễn Thành Luân</a></li>
+                        <li><a href="#"><img src={ImgPf1} alt="" className="img-contact"/>Tạ Minh Tú</a></li>
+                        <li><a href="#"><img src={ImgPf2} alt="" className="img-contact"/>Trần Công Đoàn</a></li>
+                        <li><a href="#"><img src={ImgPf3} alt="" className="img-contact"/>Nguyễn Thành Luân</a></li>
                     </ul>
                 </div>
             </div>  

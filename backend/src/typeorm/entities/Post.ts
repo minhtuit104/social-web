@@ -1,5 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, Column, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm";
 import { User } from "./User";
+import { Comment } from "./Comment";
+import { Emotion } from "./Emotion";
 
 @Entity({name: 'post'})
 export class Post{
@@ -19,10 +21,16 @@ export class Post{
     @Column({type: 'varchar', length: 200})
     privacy: string;
 
-    @Column({type: 'int', default: "0"})
+    @OneToMany(() => Comment, comment => comment.post)
+    comments: Comment[];
+
+    @OneToMany(() => Emotion, emotion => emotion.post)
+    emotions: Emotion[];
+
+    @Column({type: 'int'})
     totalEmotion: number;
 
-    @Column({type: 'int', default: "0"})
+    @Column({type: 'int'})
     totalComment: number;
 
     @CreateDateColumn({type: 'timestamp'})

@@ -1,4 +1,3 @@
-import ImgProfile from "../assets/images/tu.jpg";
 import IconGlobal from "../assets/images/icons/ic_global.svg";
 import IconFriends from "../assets/images/icons/ic_friends.svg";
 import IconThreedot from "../assets/images/icons/ic_three-dot.svg";
@@ -15,11 +14,13 @@ import IconAngry from "../assets/images/icons/ic_angry.svg";
 import IconCmt from "../assets/images/icons/ic_comment.svg";
 import IconShare from "../assets/images/icons/ic_share.svg";
 import "../assets/css/content_posts.css";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import ModalComment from "./modal_comment";
 import { fetchPosts } from "../services/PostService";
 import { formatDistanceToNow } from "date-fns";
 import postEventEmitter from "../patternEventEmitter/postEventEmitter";
+import { addEmotion } from "../services/EmotionService";
+import { useWebSocket } from "../WebSocket/WebSocketProvider";
 
 
 interface Author {
@@ -27,7 +28,8 @@ interface Author {
     name: string;
   }
   
-  interface Post {
+interface Post {
+    idPost: number;
     authorId: Author;
     title: string;
     image: string;
@@ -45,22 +47,41 @@ const privacyIcons: { [key: string]: string } = {
 const Posts = () => {
 
     const [posts, setPosts] = useState<Post[]>([]);
-    const [isMenuContent, setIsMenuContent] = useState(false);
+    const [isMenuContent, setIsMenuContent] = useState<number | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
+    const [reactions, setReactions] = useState<{ [key: string]: number }>({});
+    const [isShowEmotionOptions, setIsShowEmotionOptions] = useState<number | null>(null);
+    const socket = useWebSocket();
 
-    const handleShowMenu = () =>{
-        setIsMenuContent(!isMenuContent);
+    const handleShowMenu = (idPost: number) =>{
+        setIsMenuContent((prev) => prev === idPost ? null : idPost);
     };
-
     const handleClickOutside = (event: MouseEvent) => {
         if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-            setIsMenuContent(false);
+            setIsMenuContent(null);
         }
     };
-
+    useEffect(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+    //hàm xử lý lấy danh sách post
     useEffect(() => {
         // Gọi fetchPosts khi component được mount
-        getPosts();
+        try{
+            const getPosts = async () => {
+                let res = await fetchPosts();
+            if(res && res.data){
+                    console.log('danh sách post: ', res.data);
+                    setPosts(res.data);
+                }
+            }
+            getPosts();
+        } catch (error) {
+            console.error('Error fetching posts:', error);
+        }
 
         //lắng nghe sự kiện postCreated
         postEventEmitter.on('postCreated', (newPost: Post) => {
@@ -72,26 +93,105 @@ const Posts = () => {
           };
     }, []);
 
-    const getPosts = async () => {
-        let res = await fetchPosts();
-        if(res && res.data){
-            setPosts(res.data);
-            console.log("Danh sách bài post:", res.data); 
-        } 
+    //hàm xử lý khi người dùng click vào cảm xúc
+    const handleEmotionClick = async (idPost: number, emotion: string) => {
+        try {
+            const currentEmotion = reactions[idPost];
+            // Nếu click vào cảm xúc hiện tại, xóa cảm xúc
+            const newEmotion = String(currentEmotion) === emotion ? '' : emotion;
+            if(socket){
+                socket.emit('addEmotion', {
+                    idPost,
+                    emotion: newEmotion
+                });
+            }else{
+                    //nếu socket không khả dụng, sử dụng API thông thường
+                await addEmotion({idPost, emotion});
+            }
+    
+            setReactions(prevReactions => ({...prevReactions, [idPost]: newEmotion}));
+    
+            //Cập nhật số lượng cảm xúc trong state posts
+            setPosts(prevPosts => prevPosts.map(post => {
+                if(post.idPost === idPost){
+                    let newTotalEmotion = post.totalEmotion;
+                        if(String(currentEmotion) !== newEmotion){ 
+                            if(!currentEmotion){
+                                newTotalEmotion ++;
+                            }
+                        }else if(currentEmotion && !newEmotion){
+                            newTotalEmotion --;
+                        }           
+                        return {...post, totalEmotion: newTotalEmotion};
+                    }
+                    return post;
+                }));
+            
+            setIsShowEmotionOptions(null); // ẩn danh sách cảm xúc sau khi chọn
+
+        } catch (error) {
+            console.error('Error fetching emotions:', error);
+        }
+    };
+    const handleMouseEnter = (idPost: number) => {
+        setIsShowEmotionOptions(idPost);
     }
+    const handleMouseLeave = () => {
+        setIsShowEmotionOptions(null);
+    }
+    // hàm hỗ trợ lấy icon cảm xúc
+    const getEmotionCount = (emotion: string) => {
+        switch(emotion){
+            case 'like': return IconLike;
+            case 'love': return IconLove;
+            case 'haha': return IconHaha;
+            case 'wow': return IconWow;
+            case 'sad': return IconSad;
+            case 'angry': return IconAngry;
+            default: return IconLike;
+        }
+    };
 
+    //hàm lắng nghe sự kiện cập nhật số lượng cảm xúc của post
     useEffect(() => {
-        document.addEventListener('mousedown', handleClickOutside);
+        if(socket){
+            socket.on('receiveNewEmotion', (data) => {
+                setPosts(prevPosts => prevPosts.map(post => 
+                    post.idPost === data.idPost 
+                        ? {...post, totalEmotion: data.totalEmotion} 
+                        : post
+                ));
+                setReactions(prevReactions => ({...prevReactions, [data.idPost]: data.emotion}));
+            });
+        }
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
+            if(socket){
+                socket.off('receiveNewEmotion');
+            }
         };
-    }, []);
+    }, [socket]);
 
+    //hàm cập nhật số lượng bình luận của post
+    const updateCommentCount = useCallback((postId: number, newCount: number) => {
+        setPosts(prevPosts => prevPosts.map(post => 
+            post.idPost === postId ? {...post, totalComment: newCount} : post
+        ));
+    }, []);   
+
+    //Show modal comment
     const [isShowModalCmt, setIsShowModalCmt] = useState(false)
+    const [selectPostId, setSelectPostId] = useState<number | null>(null);
+
+    const handleShowModalComment = (idPost: number) => {
+        setSelectPostId(idPost); //cap nhật idPost đã chọn
+        setIsShowModalCmt(true);
+    }
     const handleClose = () =>{
         setIsShowModalCmt(false);
+        setSelectPostId(null); //xóa idPost khi đóng moadal
     }
 
+    //Hàm sắp xếp các bài post theo thời gian mới nhất -> lâu nhất
     const sortedPosts = Array.isArray(posts) ? posts.sort((a, b) => {
         const dateA = new Date(a.createAt);
         const dateB = new Date(b.createAt);
@@ -109,17 +209,18 @@ const Posts = () => {
                             <img src={post.authorId.avarta ?? 'https://www.gravatar.com/avatar/?d=mp' } alt="Profile Image" className="post-profile-image"/>
                             <div className="post-info">
                                 <h3>{post.authorId.name}</h3>
-                                <p>
+                                <span>
                                     {formatDistanceToNow(new Date(post.createAt), { addSuffix: true })}
-                                    <img src={privacyIcons[post.privacy]} className="ic-18 time-privacy"/></p>
+                                    <img src={privacyIcons[post.privacy]} alt="Privacy" className="ic-18 time-privacy"/>
+                                </span>
                             </div>
                         </div>
                         
                         <div className="menu-items">
-                            <button className="three-dot-btn" onClick={handleShowMenu}>
+                            <button className="three-dot-btn" onClick={() => handleShowMenu(post.idPost)}>
                                 <img src={IconThreedot} alt="Menu" className="ic-22" />
                             </button>
-                            <div ref={menuRef} className={`menu-content ${isMenuContent ? 'showmenu' : ''}`}>
+                            <div ref={menuRef} className={`menu-content ${isMenuContent === post.idPost ? 'showmenu' : ''}`}>
                                 <button className="menu-post-btn">
                                     <img src={IconBookmark} alt="" className="ic-18"/>
                                     <div className="options">
@@ -154,35 +255,78 @@ const Posts = () => {
                     <p>{post.title}</p>
                     <div className="post-images">
                         {post.image && post.image.length > 0 ? (
-                            post.image.split(',').slice(0,3).map((imageUrl, imgIndex) => (
-                                <div className={`image-container ${imgIndex === 2 ? 'large-image' : 'small-image'}`} key={`img-${imgIndex}`}>
-                                    <img src={imageUrl.trim()} alt={`Post image ${imgIndex + 1}`} className={`image ${imgIndex === 2 ? 'large-image' : 'small-image'}`}/>
-                                    {imgIndex === 2 && post.image.split(',').length > 3 && (
-                                        <div className="image-overlay">
-                                            +{post.image.split(',').length - 3}
+                            (() => {
+                                const imageUrls = post.image.split(',');
+                                const imageCount = imageUrls.length;
+
+                                if(imageCount === 1){
+                                    return (
+                                        <div className="image-container single-image">
+                                            <img src={imageUrls[0].trim()} alt="Post image" className="image" loading="lazy"/>
                                         </div>
-                                    )}
-                                </div>
-                            ))
+                                    );
+                                }else if(imageCount === 2){
+                                    return (
+                                        <div className="image-container two-image">
+                                            {imageUrls.map((imageUrl, imgIndex) => (
+                                                <img key={`img-${imgIndex}`} src={imageUrl.trim()} alt={`Post image ${imgIndex + 1}`} className="image" loading="lazy"/>
+                                            ))}
+                                        </div>
+                                    );
+                                }
+                                 else if(imageCount === 3){
+                                    return (
+                                        <div className="image-container three-image">
+                                            {imageUrls.map((imageUrl, imgIndex) => (
+                                                <img key={`img-${imgIndex}`} src={imageUrl.trim()} alt={`Post image ${imgIndex + 1}`} className="image" loading="lazy"/>
+                                            ))}
+                                        </div>
+                                    );
+                                }else{
+                                    return imageUrls.slice(0, 3).map((imageUrl, imgIndex) => (
+                                        <div className={`image-container ${imgIndex === 2 ? 'large-image' : 'small-image'}`} key={`img-${imgIndex}`}>
+                                            <img src={imageUrl.trim()} alt={`Post image ${imgIndex + 1}`} className={`image ${imgIndex === 2 ? 'large-image' : 'small-image'}`} loading="lazy"/>
+                                            {imgIndex === 2 && imageCount > 3 && (
+                                                <div className="image-overlay">
+                                                    +{imageCount - 3}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ));
+                                }
+                                    
+                            })()
                         ) : (
                             <></>
                         )}                     
                     </div>
                     <div className="post-footer">
                         <div className="like-comment">
-                            <div className="main-reaction">
-                                <img src={IconLike} className="ic-like-comment" id="mainReaction"/>
+                            <div className="emotion-container"
+                                onMouseEnter={() => handleMouseEnter(post.idPost)}
+                                onMouseLeave={handleMouseLeave}
+                            >   
+                                <div className="main-reaction">
+                                    <img 
+                                        src={reactions[post.idPost] ? getEmotionCount(reactions[post.idPost].toString()) : IconLike} 
+                                        className="ic-like-comment" 
+                                        alt="Reaction"
+                                        onClick={() => handleEmotionClick(post.idPost, reactions[post.idPost] ? '' : 'like')}
+                                    />
                                 <span className="feelingCount">{post.totalEmotion}</span>
-                                <div className="feeling-options" id="feelingOptions">
-                                    <img src={IconLike} alt="Like" className="feeling-icon" data-reaction="like-fillsvg"/>
-                                    <img src={IconLove} alt="Love" className="feeling-icon" data-reaction="love"/>
-                                    <img src={IconHaha} alt="Haha" className="feeling-icon" data-reaction="haha"/>
-                                    <img src={IconWow} alt="Wow" className="feeling-icon" data-reaction="wow"/>
-                                    <img src={IconSad} alt="Sad" className="feeling-icon" data-reaction="sad"/>
-                                    <img src={IconAngry} alt="Angry" className="feeling-icon" data-reaction="angry"/>
                                 </div>
+                                {isShowEmotionOptions === post.idPost && (
+                                    <div className="feeling-options">
+                                        <img src={IconLike} alt="Like" className="feeling-icon" onClick={() => handleEmotionClick(post.idPost, 'like')}/>
+                                        <img src={IconLove} alt="Love" className="feeling-icon" onClick={() => handleEmotionClick(post.idPost, 'love')}/>
+                                        <img src={IconHaha} alt="Haha" className="feeling-icon" onClick={() => handleEmotionClick(post.idPost, 'haha')}/>
+                                        <img src={IconWow} alt="Wow" className="feeling-icon" onClick={() => handleEmotionClick(post.idPost, 'wow')}/>
+                                        <img src={IconSad} alt="Sad" className="feeling-icon" onClick={() => handleEmotionClick(post.idPost, 'sad')}/>
+                                        <img src={IconAngry} alt="Angry" className="feeling-icon" onClick={() => handleEmotionClick(post.idPost, 'angry')}/>
+                                    </div>
+                                )}
                             </div>
-                            <button className="comment-btn" onClick={() => setIsShowModalCmt(true)}><img src={IconCmt} alt="comment" className="ic-like-comment"/></button>
+                            <button className="comment-btn" onClick={() => handleShowModalComment(post.idPost)}><img src={IconCmt} alt="comment" className="ic-like-comment"/></button>
                             <span>{post.totalComment}</span>
                         </div>
                         <div className="share">
@@ -196,10 +340,15 @@ const Posts = () => {
         )}
         </div>
     </div>
-    <ModalComment 
-    show = {isShowModalCmt}
-    handleClose = {handleClose}
-    />
+    {isShowModalCmt && selectPostId && (
+        <ModalComment 
+        show = {isShowModalCmt}
+        idPost = {selectPostId}
+        handleClose = {handleClose}
+        updateCommentCount = {updateCommentCount}
+        />
+    )}
+    
     </>);
 };
 

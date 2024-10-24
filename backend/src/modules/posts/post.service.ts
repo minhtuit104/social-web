@@ -25,12 +25,14 @@ export class PostService{
     async findOne(id: number){
         const post = await this.postRepository.findOne({
             where: {idPost: id},
+            cache: false,
+            relations: ['authorId']
         });
 
         if(!post){
             throw new Error('Post not found');
         }
-        return plainToInstance(Post, post);
+        return post;
     }
 
     async remove(id: number){

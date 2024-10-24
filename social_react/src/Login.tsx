@@ -67,8 +67,12 @@ const Login = () => {
         try {
             let res = await registerApi(formData.name, formData.email, formData.birthday, formData.password);
             console.log('Registration successful:', res);
-            toast.success("Register successful!");
-            navigate("/login");
+            if(res && res.status === 400){
+                toast.error(res.data.message.message);            
+            }else{
+                toast.success("Register successful!");
+                navigate("/login");
+            }
             // Handle successful registration (e.g., redirect to login)
         } catch (error) {
             console.error('Registration failed:', error);

@@ -1,0 +1,25 @@
+@import url(../../assets/css/styles.css);
+
+.chatOnlineFriend{
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 10px;
+    flex-direction: column;
+}
+
+.chatOnlineImg{
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 1px solid white;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+.chatOnlineName{
+    font-size: 18px;
+    font-weight: 550;
+    margin-top: 10px;
+    opacity: 0.9;
+}

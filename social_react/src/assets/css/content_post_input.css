@@ -17,6 +17,7 @@
     height: 50px;
     border-radius: 50%;
     margin-right: 16px;
+    object-fit: cover;
 }
 .post-input-top button {
     width: 90%;
@@ -199,11 +200,7 @@
     justify-content: center;
 }
 
-.modal-footer button{
-    background-color: var(--blue1) !important;
-    
 
-}
 .modal-footer button[disabled=disabled], button:disabled {
     cursor: not-allowed;
 }
