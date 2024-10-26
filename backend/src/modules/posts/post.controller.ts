@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards, Response,} from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards, Response, ParseIntPipe,} from "@nestjs/common";
 import { PostService } from "./post.service";
 import { CreatePostDto } from "./dtos/create.dto";
 import { UpdatePostDto } from "./dtos/update.dto";
@@ -54,5 +54,16 @@ export class PostController{
     @UseGuards(JwtAuthGuard)
     update(@Param('id') id: number, @Body() updatePostDto: UpdatePostDto){
         return this.postService.update(id, updatePostDto);
+    }
+
+    @Get('/user/:idUser')
+    @UseGuards(JwtAuthGuard)
+    async fetchPostByIdUser(@Param('idUser', ParseIntPipe) idUser: number, @Req() req: Request, @Response() res){
+        const posts = await this.postService.fetchPostByIdUser(idUser);
+        return res.status(200).json({
+            status: 'success',
+            message: 'Posts retrieved successfully',
+            data: posts,
+          });
     }
 }

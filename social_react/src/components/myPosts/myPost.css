@@ -1,4 +1,4 @@
-@import url(./styles.css);
+@import url(../../assets/css/styles.css);
 
 .posts {
     margin-top: 25px; 
@@ -28,13 +28,11 @@
     border-radius: 50%;
     margin-right: 10px;
     object-fit: cover;
-    cursor: pointer;
 }
 
 .posts .post-header .post-info h3{
     font-size: 18px;
     font-weight: 700;
-    cursor: pointer;
 }
 
 .posts .post-header .post-info span{
@@ -114,7 +112,7 @@
     justify-content: flex-start;
     align-items: center; 
     flex-wrap: nowrap;
-    gap: 5px;
+    gap: 10px;
     overflow-x: auto;
     position: relative;
 }
@@ -122,7 +120,7 @@
 
 .post-images .image-container{
     position: relative;
-    /* width: 90%; */
+    width: 90%;
 }
 
 .post-images .image-container.single-image img{
@@ -245,13 +243,4 @@
 }
 .share {
     cursor: pointer;
-}
-::-webkit-scrollbar {
-    width: 5px;
-}
-::-webkit-scrollbar-thumb {
-    background-color: #939393;
-}
-::-webkit-scrollbar-track {
-    background-color: #f1f1f1;
 }

@@ -7,6 +7,7 @@ import IconNotification from "../../assets/images/icons/ic_notifications.svg";
 import IconSetting from "../../assets/images/icons/ic_setting.svg";
 import { useEffect, useState } from "react";
 import { fectchUserName } from "../../services/UserService";
+import { useNavigate } from "react-router-dom";
 
 const getUserFromToken = () => {
     const token = localStorage.getItem('token');
@@ -31,6 +32,7 @@ const NavbarMessager = () => {
     const user = getUserFromToken();
     const currentUserId = user?.idUser;
     const [avarta, setAvarta] = useState<string | null>(null);
+    const navigate = useNavigate();
 
 
     useEffect(() => {
@@ -43,13 +45,18 @@ const NavbarMessager = () => {
         getUser();
     }, [currentUserId]);
 
+    const hadleHome = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+        event.preventDefault();
+        navigate("/home");
+    }
+
 
   return (
     <div className="navbarMessager">
         <div className="navbarMessagerWrapper">
             <div className="navbarMessagerLeft">
                 <div className="logo">
-                <a href="/home"><img src={Logo} alt="" className="logoImg" /></a>
+                <a href="/home" onClick={hadleHome}><img src={Logo} alt="" className="logoImg" /></a>
                 </div>
                 <div className="navbarMessagerInput">
                     <input type="text" placeholder="Search post or video" />
@@ -59,7 +66,7 @@ const NavbarMessager = () => {
             <div className="navbarMessagerRight">
                 <div className="navbarMessagerRightIcon">
                     <div className="Options">
-                        <a href="/home"><img src={IconHome} alt="" className="ic-22 icons" /></a>
+                        <a href="/home" onClick={hadleHome}><img src={IconHome} alt="" className="ic-22 icons" /></a>
                     </div>
                     <div className="Options">
                         <a href="/friends"><img src={IconFriend} alt="" className="ic-22 icons" /></a>

@@ -19,7 +19,6 @@ const NavBar = () => {
     const [userName, setUserName] = useState<string | null>(null);
     const [emailInfo, setEmailInfo] = useState<string | null>(null);
     const [avarta, setAvarta] = useState<string | null>(null);
-    const [notifications, setNotifications] = useState<any[]>([]);//danh sách thông báo
     const [showModalNotification, setShowModalNotification] = useState(false);//hiển thị modal thông báo
 
     //hàm hiển thị đóng mở modal thông báo
@@ -80,15 +79,23 @@ const NavBar = () => {
     const navigate = useNavigate();
     const handleLogout = () => {
         localStorage.removeItem("token");
-        navigate("/");
+        navigate("/home");
         toast.success("Logout success!")
+    }
+    const handleProfile = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+        event.preventDefault();
+        navigate(`/profile/${idUser}`);
+    }
+    const handleMessage = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+        event.preventDefault();
+        navigate("/home/messager");
     }
 
     return (<>
     <div className="nav-side-bar">
         <div className="profile">
             <div className="profile-image">
-                <img src={avarta ?? 'https://www.gravatar.com/avatar/?d=mp' } alt="Profile Image" />
+                <a href="/home/profile" onClick={handleProfile}><img src={avarta ?? 'https://www.gravatar.com/avatar/?d=mp' } alt="Profile Image" /></a>
             </div>
             <h3>{userName ?? 'Loading...'}</h3>
             <p>{emailInfo ?? 'Loading...'}</p>
@@ -96,13 +103,13 @@ const NavBar = () => {
         <nav>
             <ul>
                 <li className={activeTab === "new-feed" ? "active" : ""}><a href="/home"><img src={IconNew} alt="" className="ic-22" />News Feed</a></li>
-                <li><a href="/home/messager"><img src= {IconMessage} alt="" className="ic-22" />Messages</a><span className="quantity">9</span></li>
+                <li><a href="/home/messager" onClick={handleMessage}><img src= {IconMessage} alt="" className="ic-22" />Messages</a><span className="quantity">9</span></li>
                 <li><a href="/friends"><img src= {IconFriend} alt="" className="ic-22" />Friends</a><span className="quantity">9</span></li>
                 <li><a href="#" onClick={toggleModalNotification}><img src= {IconNotting} alt="" className="ic-22" />Notifications</a><span className="quantity">9</span></li>
                 <li>
                     <img src= {IconSetting} className="ic-22 icSetting" alt="Settings" />
                     <NavDropdown title="Settings" className="DropdownSetting" style={{marginLeft: '-13px'}}>
-                        <NavDropdown.Item href="/profile">Profile</NavDropdown.Item>
+                        <NavDropdown.Item href="#" onClick={handleProfile}>Profile</NavDropdown.Item>
                         <NavDropdown.Item onClick={() => handleLogout()}>Logout</NavDropdown.Item>
                     </NavDropdown>
                 </li>

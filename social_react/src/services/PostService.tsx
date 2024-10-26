@@ -43,4 +43,25 @@ const createPost = async (postData: any) => {
     }
 };
 
-export {fetchPosts, createPost};
+const fetchPostByIdUser = async (idUser: number) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.error('Token is missing');
+        return;
+    }
+
+    try {
+        const response = await axios.get(`/api/v1/posts/user/${idUser}`, {
+            headers: {
+                Authorization: `Bearer ${token}` 
+            }
+        });
+
+        return response;
+    } catch (error) {
+        console.error('Error fetching posts:', error);
+        throw error;
+    }
+}
+
+export {fetchPosts, createPost, fetchPostByIdUser};

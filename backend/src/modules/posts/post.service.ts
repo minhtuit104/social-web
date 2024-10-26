@@ -72,4 +72,11 @@ export class PostService{
             return this.postRepository.save(findPost);
         }
     }
+
+    async fetchPostByIdUser(idUser: number){
+        return await this.postRepository.find({
+            where: {authorId: {idUser: idUser}},
+            relations: ['authorId']
+        });
+    }
 }

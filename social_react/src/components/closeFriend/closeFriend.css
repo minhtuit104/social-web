@@ -1,0 +1,24 @@
+@import url(../../assets/css/styles.css);
+
+.profileMenu-FriendsItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.profileMenu-FriendsItem-Avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profileMenu-FriendsItem-Name {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.profileMenu-line {
+    border: 1px solid #939393;
+    margin: 10px 0;
+} 

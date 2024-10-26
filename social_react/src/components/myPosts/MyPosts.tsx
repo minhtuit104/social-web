@@ -1,35 +1,32 @@
-import IconGlobal from "../assets/images/icons/ic_global.svg";
-import IconFriends from "../assets/images/icons/ic_friends.svg";
-import IconThreedot from "../assets/images/icons/ic_three-dot.svg";
-import IconBookmark from "../assets/images/icons/ic_bookmark.svg";
-import IconHide from "../assets/images/icons/ic_hide.svg";
-import IconReport from "../assets/images/icons/ic_report.svg";
-import IconEdit from "../assets/images/icons/ic_edit.svg";
-import IconLike from "../assets/images/icons/ic_like-fillsvg.svg";
-import IconLove from "../assets/images/icons/ic_love.svg";
-import IconHaha from "../assets/images/icons/ic_haha.svg";
-import IconWow from "../assets/images/icons/ic_wow.svg";
-import IconSad from "../assets/images/icons/ic_sad.svg";
-import IconAngry from "../assets/images/icons/ic_angry.svg";
-import IconCmt from "../assets/images/icons/ic_comment.svg";
-import IconShare from "../assets/images/icons/ic_share.svg";
-import "../assets/css/content_posts.css";
+import IconGlobal from "../../assets/images/icons/ic_global.svg";
+import IconFriends from "../../assets/images/icons/ic_friends.svg";
+import IconThreedot from "../../assets/images/icons/ic_three-dot.svg";
+import IconBookmark from "../../assets/images/icons/ic_bookmark.svg";
+import IconHide from "../../assets/images/icons/ic_hide.svg";
+import IconReport from "../../assets/images/icons/ic_report.svg";
+import IconEdit from "../../assets/images/icons/ic_edit.svg";
+import IconLike from "../../assets/images/icons/ic_like-fillsvg.svg";
+import IconLove from "../../assets/images/icons/ic_love.svg";
+import IconHaha from "../../assets/images/icons/ic_haha.svg";
+import IconWow from "../../assets/images/icons/ic_wow.svg";
+import IconSad from "../../assets/images/icons/ic_sad.svg";
+import IconAngry from "../../assets/images/icons/ic_angry.svg";
+import IconCmt from "../../assets/images/icons/ic_comment.svg";
+import IconShare from "../../assets/images/icons/ic_share.svg";
+import '../../assets/css/content_posts.css';
 import { useCallback, useEffect, useRef, useState } from "react";
-import ModalComment from "./modal_comment";
-import { fetchPosts } from "../services/PostService";
+import ModalComment from "../modal_comment";
+import { fetchPostByIdUser } from "../../services/PostService";
 import { formatDistanceToNow } from "date-fns";
-import postEventEmitter from "../patternEventEmitter/postEventEmitter";
-import { addEmotion } from "../services/EmotionService";
-import { useWebSocket } from "../WebSocket/WebSocketProvider";
-import { useNavigate } from "react-router-dom";
+import postEventEmitter from "../../patternEventEmitter/postEventEmitter";
+import { addEmotion } from "../../services/EmotionService";
+import { useWebSocket } from "../../WebSocket/WebSocketProvider";
 
 
 interface Author {
-    idUser: number;
     avarta: string;
     name: string;
-  }
-  
+  } 
 interface Post {
     idPost: number;
     authorId: Author;
@@ -41,22 +38,24 @@ interface Post {
     createAt: Date;
   }
 
+interface MyPostsProps {
+    idUser: number;
+}
+
 const privacyIcons: { [key: string]: string } = {
     Publish: IconGlobal,
     Friends: IconFriends,
 };
 
-const Posts = () => {
+const MyPosts: React.FC<MyPostsProps> = ({idUser}) => {
 
     const [posts, setPosts] = useState<Post[]>([]);
     const [isMenuContent, setIsMenuContent] = useState<number | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
     const [reactions, setReactions] = useState<{ [key: string]: number }>({});
     const [isShowEmotionOptions, setIsShowEmotionOptions] = useState<number | null>(null);
-    const navigate = useNavigate();
     const socket = useWebSocket();
 
-    //hàm xử lý hiển thị menu (save, hide, report, edit)
     const handleShowMenu = (idPost: number) =>{
         setIsMenuContent((prev) => prev === idPost ? null : idPost);
     };
@@ -71,20 +70,14 @@ const Posts = () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
-
-    //hàm chuyển hướng tới trang profile của người dùng
-    const handleNavigateToProfile = (idUser: number) => {
-        navigate(`/profile/${idUser}`);
-    }
-
-    //hàm xử lý lấy danh sách post
+    //hàm xử lý lấy danh sách post của người dùng
     useEffect(() => {
         // Gọi fetchPosts khi component được mount
         try{
             const getPosts = async () => {
-                let res = await fetchPosts();
+                let res = await fetchPostByIdUser(idUser);
             if(res && res.data){
-                    // console.log('danh sách post: ', res.data);
+                    console.log('danh sách MyPosts: ', res.data);
                     setPosts(res.data);
                 }
             }
@@ -216,9 +209,9 @@ const Posts = () => {
                 <div className="post" key={`post-${index}`}>
                     <div className="post-header">
                         <div className="nav-post">
-                            <img src={post.authorId.avarta ?? 'https://www.gravatar.com/avatar/?d=mp' } alt="Profile Image" className="post-profile-image" onClick={() => handleNavigateToProfile(post.authorId.idUser)}/>
+                            <img src={post.authorId?.avarta ?? 'https://www.gravatar.com/avatar/?d=mp' } alt="Profile Image" className="post-profile-image"/>
                             <div className="post-info">
-                                <h3 onClick={() => handleNavigateToProfile(post.authorId.idUser)}>{post.authorId.name}</h3>
+                                <h3>{post.authorId?.name}</h3>
                                 <span>
                                     {formatDistanceToNow(new Date(post.createAt), { addSuffix: true })}
                                     <img src={privacyIcons[post.privacy]} alt="Privacy" className="ic-18 time-privacy"/>
@@ -362,4 +355,4 @@ const Posts = () => {
     </>);
 };
 
-export default Posts;
+export default MyPosts;
