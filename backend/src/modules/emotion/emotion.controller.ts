@@ -41,6 +41,26 @@ export class EmotionController{
           });
     }
 
+    //lấy cảm xúc hiện tại của user
+    @Get('/user')
+    @UseGuards(JwtAuthGuard)
+    async getUserEmotions(@Req() req: Request, @Response() res){
+        try{
+            const user = req['user'];  
+            const emotions = await this.emotionService.getEmotionsByUser(user.idUser);
+            return res.status(200).json({
+                status: 'success',
+                data: emotions,
+            });
+        } catch (error) {
+            console.log('lỗi server rồi !!!: ', error);
+            return res.status(500).json({
+                status: 'error',
+                message: 'Internal server error',
+            });
+        }
+    }
+
     @Delete('/:id')
     @UseGuards(JwtAuthGuard)
     removeEmotion(@Param('id') id: number){

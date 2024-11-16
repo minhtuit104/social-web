@@ -1,9 +1,10 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "src/typeorm/entities/User";
 import { Repository } from "typeorm";
 import { CreateUserDto } from "./dtos/create.dto";
 import { UpdateUserDto } from "./dtos/update.dto";
+import { UpdateAvatarDto } from "./dtos/updateAvatar.dto";
 
 @Injectable()
 
@@ -52,6 +53,21 @@ export class UserService{
 
             //lưu dữ liệu được ncập nhật vào trong database
             return this.userRepository.save(findUser);
+        }
+    }
+
+    //hàm cập nhật avatar
+    async updateAvatar(id: number, updateAvatarDto: UpdateAvatarDto){
+        const findUser = await this.findOne(id);
+        if(!findUser){
+            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+        }
+        try{
+            findUser.avarta = updateAvatarDto.imageUrl;
+            const updateUser = await this.userRepository.save(findUser);
+            return updateUser;
+        } catch (error) {
+            throw new HttpException('Failed to update avatar', HttpStatus.INTERNAL_SERVER_ERROR, {cause: error});
         }
     }
 }

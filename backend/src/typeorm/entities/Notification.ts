@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { User } from "./User";
 import { Post } from "./Post";
 import { Comment } from "./Comment";
@@ -39,4 +39,8 @@ export class Notification {
     //trạng thái thông báo
     @Column({default: false})
     isRead: boolean;
+
+    //update thông báo
+    @UpdateDateColumn()
+    updatedAt: Date;
 }

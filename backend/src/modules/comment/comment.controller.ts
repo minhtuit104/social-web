@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Req, Response, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Post, Put, Query, Req, Response, UseGuards } from "@nestjs/common";
 import { CommentService } from "./comment.service";
 import { UpdateCommentDto } from "./dto/update.dto";
 import { JwtAuthGuard } from "../auth/jwtAuthGuard/jwtAuthGuard";
@@ -10,7 +10,7 @@ import { PostService } from "../posts/post.service";
 
 @ApiBearerAuth()
 @ApiTags('Comments')
-@Controller('api/v1/comments')
+@Controller('/api/v1/comments')
 export class CommentController {
 
     constructor(
@@ -21,11 +21,16 @@ export class CommentController {
 
     @Get()
     @UseGuards(JwtAuthGuard)
-    async findAll(@Response() res){
-        const comments = await this.commentService.findAll();
+    async findAll(
+        @Response() res,
+        @Query('page', ParseIntPipe) page: number = 1,
+        @Query('pageSize', ParseIntPipe) pageSize: number = 10
+    ){
+        const comments = await this.commentService.findAll(page, pageSize);
         return res.status(200).json({
-            status: 'success',
-            message: 'Comments retrieved successfully',
+            code: 200,
+            success: true,
+            message: 'SUCCESS',
             data: comments,
           });
     }
@@ -76,7 +81,18 @@ export class CommentController {
 
     @Get('/:idPost')
     @UseGuards(JwtAuthGuard)
-    getCommentsByPost(@Param('idPost') idPost: number){
-        return this.commentService.getCommentsByPost(idPost);
+    async getCommentsByPost(
+        @Param('idPost') idPost: number,
+        @Query('page', ParseIntPipe) page: number = 1,  
+        @Query('pageSize', ParseIntPipe) pageSize: number = 2,
+        @Response() res
+    ){
+        const result = await this.commentService.getCommentsByPost(idPost, page, pageSize);
+        return res.status(200).json({
+            code: 200,
+            success: true,
+            message: 'SUCCESS',
+            data: result
+          });
     }
 }

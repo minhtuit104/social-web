@@ -41,6 +41,9 @@
     border-radius: 10px;
     cursor: pointer;
 }
+.stories-body .story-item:hover{
+    opacity: 0.9;
+}
 .stories-body .create-story .ic-create-str{
     width: 30px;
     height: 30px;
@@ -62,10 +65,17 @@
     color: var(--white1);
     margin-top: 10px;
 }
+.stories-body .stories-list{
+    display: flex;
+    flex-direction: row;
+}
 .stories-body .story-item{
     margin-right: 10px;
     cursor: pointer;
     position: relative;
+    border-radius: 12px;
+    border: 2px solid var(--grey5);
+    box-shadow: 3px 0 5px rgba(0, 0, 0, 0.1);
 }
 .stories-body .story-item img{
     width: 100px;
@@ -79,7 +89,7 @@
     position: absolute;
     bottom: 0;
     margin-bottom: 5px;
-    background-color: var(--white1);
+    background-color: var(--white3);
     border-radius: 14px;
     width: 100%;
     /* text-align: center; */

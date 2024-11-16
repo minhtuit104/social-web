@@ -46,5 +46,27 @@ const fetchAllUser = async () => {
     }
 }
 
+const updateAvatar = async (imageUrl: string) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        throw new Error('Token is missing');
+    }
+    try {
+        const response = await axios.put(
+            `/api/v1/users/update-avatar`,
+            {imageUrl}, 
+            {
+                headers: {
+                    Authorization: `Bearer ${token}` ,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error updating avatar:', error);
+        throw error;
+    }
+}
 
-export {loginApi, registerApi, fectchUserName, fetchAllUser};
+export {loginApi, registerApi, fectchUserName, fetchAllUser, updateAvatar};

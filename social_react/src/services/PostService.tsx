@@ -1,19 +1,19 @@
 import axios from "./axios";
 
-const fetchPosts = async () =>{
+const fetchPosts = async (page: number = 1, pageSize: number = 5) =>{
     const token = localStorage.getItem('token');
     if (!token) {
-        console.error('Token is missing');
-        return;
+        throw new Error('Token is missing');
     }
     
     try {
         // Gọi API với token trong header Authorization
-        return await axios.get('/api/v1/posts', {
+        const response = await axios.get(`/api/v1/posts?page=${page}&pageSize=${pageSize}`, {
             headers: {
                 Authorization: `Bearer ${token}` 
             }
         });
+        return response;
     } catch (error) {
         console.error('Error fetching posts:', error);
         throw error; // Ném lỗi để xử lý sau này
@@ -23,8 +23,7 @@ const fetchPosts = async () =>{
 const createPost = async (postData: any) => {
     const token = localStorage.getItem('token');
     if (!token) {
-        console.error('Token is missing');
-        return;
+        throw new Error('Token is missing');
     }
 
     try {
@@ -34,7 +33,6 @@ const createPost = async (postData: any) => {
                 Authorization: `Bearer ${token}` 
             }
         });
-
         return response;
 
     } catch (error) {
@@ -43,7 +41,7 @@ const createPost = async (postData: any) => {
     }
 };
 
-const fetchPostByIdUser = async (idUser: number) => {
+const fetchPostByIdUser = async (idUser: number, page: number = 1, pageSize: number = 10) => {
     const token = localStorage.getItem('token');
     if (!token) {
         console.error('Token is missing');
@@ -51,12 +49,11 @@ const fetchPostByIdUser = async (idUser: number) => {
     }
 
     try {
-        const response = await axios.get(`/api/v1/posts/user/${idUser}`, {
+        const response = await axios.get(`/api/v1/posts/user/${idUser}?page=${page}&pageSize=${pageSize}`, {
             headers: {
                 Authorization: `Bearer ${token}` 
             }
         });
-
         return response;
     } catch (error) {
         console.error('Error fetching posts:', error);

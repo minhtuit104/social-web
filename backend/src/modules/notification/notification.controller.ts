@@ -1,7 +1,8 @@
-import { Controller, Delete, Get, Param, Patch, Response } from "@nestjs/common";
+import { Controller, Delete, Get, Param, ParseIntPipe, Patch, Query, Response, UseGuards } from "@nestjs/common";
 import { NotificationService } from "./notification.service";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { UserService } from "../users/user.service";
+import { JwtAuthGuard } from "../auth/jwtAuthGuard/jwtAuthGuard";
 
 
 @ApiBearerAuth()
@@ -16,12 +17,18 @@ export class NotificationController {
 
     //lấy tất cả thông báo của một người dùng
     @Get('/:id')
-    // @UseGuards(JwtAuthGuard)
-    async findAll(@Param('id') id: number, @Response() res){
-        const notifications = await this.notificationService.findAll(id);
+    @UseGuards(JwtAuthGuard)
+    async findAll(
+        @Param('id') id: number, 
+        @Response() res,
+        @Query('page', ParseIntPipe) page: number = 1,
+        @Query('pageSize', ParseIntPipe) pageSize: number = 10
+    ){
+        const notifications = await this.notificationService.findAll(id, page, pageSize);
         return res.status(200).json({
-            status: 'success',
-            message: 'Notifications retrieved successfully',
+            code: 200,
+            success: true,
+            message: 'SUCCESS',
             data: notifications,
           });
     }

@@ -1,0 +1,87 @@
+@import url(../../assets/css/styles.css);
+
+.story-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    z-index: 1000;
+}
+
+.left-bar-story {
+    width: 400px;
+    background: #242526;
+    height: 100%;
+    border-right: 1px solid #3e4042;
+    overflow-y: auto;
+}
+
+.left-bar-header {
+    padding: 16px;
+    border-bottom: 1px solid #3e4042;
+}
+
+.left-bar-header span {
+    color: #e4e6eb;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.users-list {
+    padding: 8px;
+}
+
+.user-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+    margin-bottom: 4px;
+}
+
+.user-item:hover {
+    background-color: rgba(58, 59, 60, 0.6); 
+}
+
+.user-item.actived {
+    background-color: rgba(243, 211, 211, 0.1);
+}
+
+.user-avatar-left-bar {
+    width: 45px;
+    height: 45px;
+    margin-right: 12px;
+    position: relative;
+    border: 2px solid #597087;
+    border-radius: 50%;
+}
+
+.user-avatar-left-bar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    position: relative; 
+    z-index: 1; 
+}
+
+.user-info-left-bar {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-name {
+    color: #e4e6eb;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.story-count {
+    color: var(--blue2);
+    font-size: 12px;
+}

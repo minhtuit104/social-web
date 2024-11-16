@@ -1,13 +1,15 @@
 @import url(./styles.css);
 
+
 .posts {
-    margin-top: 25px; 
+    margin-top: 25px;
+    position: relative;
 }
 
 .posts .post {
     padding: 25px;
-    border: 2px solid #ccc;
-    box-shadow: 0px 1px 1px var(--grey1);
+    border: 2px solid #e9e5e5;
+    box-shadow: 1px 1px 1px 0 var(--grey1);
     border-radius: 10px;
     margin-bottom: 20px;
 }
@@ -35,6 +37,9 @@
     font-size: 18px;
     font-weight: 700;
     cursor: pointer;
+}
+.posts .post-header .post-info h3:hover {
+    text-decoration: underline;
 }
 
 .posts .post-header .post-info span{
@@ -122,7 +127,7 @@
 
 .post-images .image-container{
     position: relative;
-    /* width: 90%; */
+    width: 100%;
 }
 
 .post-images .image-container.single-image img{
@@ -133,11 +138,11 @@
 }
 .post-images .image-container.two-image{
     display: flex;
-    gap: 10px;
+    gap: 5px;
 }
 .post-images .image-container.two-image img{
-    width: 50%;
-    height: 300px;
+    width: 49%;
+    height: 340px;
     object-fit: cover;
     border-radius: 14px;
 }
@@ -158,12 +163,12 @@
 }
 .small-image{   
     border-radius: 14px;
-    width: 180px;
+    width: 184px !important;
     height: 300px;
     object-fit: cover;
 }
 .large-image {
-    width: 275px; 
+    width: 280px !important; 
     height: 300px; 
     object-fit: cover;
     border-radius: 14px;
@@ -201,6 +206,12 @@
 .ic-like-comment{
     width: 28px;
     height: 28px;
+}
+.ic-like-default{
+    width: 28px;
+    height: 28px;
+    margin-bottom: 3px;
+    margin-right: 3px;
 }
 .post .post-footer .like-comment .main-reaction{
     display: flex;

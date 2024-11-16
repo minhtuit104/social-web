@@ -6,6 +6,7 @@ interface ProfilePostListProps {
 }
 
 const ProfilePostList: React.FC<ProfilePostListProps> = ({idUser}) => {
+
     return (<>
         <div className="profilePostList">
             <MyPosts idUser={idUser} />

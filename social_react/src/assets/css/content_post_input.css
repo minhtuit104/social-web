@@ -5,6 +5,7 @@
     background-color: rgba(104, 208, 202, 0.2);
     padding: 20px 20px 10px 20px;
     border-radius: 14px;
+    border: 1px solid #e9e5e5;
 }
 .post-input-top{
     display: flex;
@@ -84,6 +85,7 @@
 
 .modal-content{
     border-radius: 10px !important;
+    height: auto !important;
 }
 
 .custom-modal{

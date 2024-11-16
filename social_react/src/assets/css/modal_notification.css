@@ -14,6 +14,7 @@
     border-left: 1px solid #ddd;
     display: flex;
     flex-direction: column;
+    --animate-duration: 0.5s;
 }
 .notification-header {
     display: flex;
@@ -49,3 +50,30 @@
     padding: 7px;
 }
 
+.notification-content h3{
+    font-size: 18px;
+    font-weight: 550;
+    color: var(--black1);
+    margin: 10px 0;
+    border-bottom: 1px solid #eee;
+    margin-left: 7px;
+}
+
+.no-notifications {
+    margin-left: 7px;
+}
+
+.friend-item {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

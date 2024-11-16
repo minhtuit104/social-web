@@ -90,4 +90,17 @@ export class EmotionService{
         const totalEmotionCount = counts.reduce((acc, curr) => acc + curr.count, 0);
         return totalEmotionCount;
     }
+
+    // lấy danh sách cảm xúc của user
+    async getEmotionsByUser(userId: number): Promise<Emotion[]>{
+        const user = await this.usersRepository.findOne({ where: { idUser: userId } });
+        if(!user){
+            throw new NotFoundException('Không tìm thấy user');
+        }
+        const emotions = await this.emotionRepository.find({
+            where: {user: { idUser: userId }},
+            relations: ['post']
+        });
+        return emotions;
+    }
 }

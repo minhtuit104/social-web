@@ -1,8 +1,7 @@
 import "../assets/css/profile.css";
-import NavbarMessager from "../components/navbarMessager/NavbarMessager";
 import ProfileHeader from "../components/profileHeader/ProfileHeader";
-import ProfileMenu from "../components/profileMenu/ProfileMenu";
 import ProfilePostList from "../components/profilePostList/ProfilePostList";
+import { UserProvider } from "../components/UserContext/UserContext";
 import NavBar from "../layouts/NavBar";
 import { useParams } from "react-router-dom";
 
@@ -11,15 +10,25 @@ const Profile = () => {
     const userIdNumber = Number(userId);
 
     return (<>
-        <NavbarMessager />
+        <UserProvider>
         <div className="profileContainer">
             {/* <ProfileMenu /> */}
             <NavBar />
-            <div className="profileContent">
-                <ProfileHeader idUser={userIdNumber} />
-                <ProfilePostList idUser={userIdNumber} />
+            
+            <div className="profileContent" id="scrollableDiv-myPosts">
+                <div className="profile-wrapper">
+                    <ProfileHeader
+                        key={`header-${userIdNumber}`}
+                        idUser={userIdNumber} 
+                    />
+                    <ProfilePostList 
+                        key={`post-${userIdNumber}`}
+                        idUser={userIdNumber} 
+                    />
+                </div>
             </div>
         </div>
+        </UserProvider>
     </>);
 }
 

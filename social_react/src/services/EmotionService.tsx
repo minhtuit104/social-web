@@ -38,4 +38,23 @@ const fetchEmotionsByPost = async (idPost: number) => {
     }
 };
 
-export { addEmotion, fetchEmotionsByPost };
+const getEmotionsByUser = async () => {
+    const token = localStorage.getItem('token');
+    if(!token){
+        console.log('token is missing');
+        return;
+    }
+    try {
+        const response = await axios.get(`/api/v1/emotions/user`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching emotions:', error);
+        throw error;
+    }
+}
+
+export { addEmotion, fetchEmotionsByPost, getEmotionsByUser };

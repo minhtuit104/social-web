@@ -1,15 +1,34 @@
 import axios from "axios";
 
-const fetchCommentsById = async (idPost: number) => {
+interface ApiResponse<T> {
+    code: number;
+    success: boolean;
+    message: string;
+    data: {
+        data: T[];
+        pagination: PaginationInfo;
+    };
+}
+
+export interface PaginationInfo {
+    total: number;
+    last_page: number;
+    page: number;
+    pageSize: number;
+}
+
+
+
+
+const fetchCommentsById = async (idPost: number, page: number = 1, pageSize: number = 2): Promise<ApiResponse<any>> => {
     const token = localStorage.getItem('token');
 
     if(!token){
-        console.log('token is missing');
-        return;
+        throw new Error('Token is missing');
     }
 
     try {
-        const response = await axios.get(`/api/v1/comments/${idPost}`,{
+        const response = await axios.get<ApiResponse<any>>(`/api/v1/comments/${idPost}?page=${page}&pageSize=${pageSize}`,{
             headers: {
                 Authorization: `Bearer ${token}`
             }

@@ -1,7 +1,6 @@
 import IconGlobal from "../assets/images/icons/ic_global.svg";
 import IconArrdow from "../assets/images/icons/ic_arrorw-dow.svg";
 import IconLibrary from "../assets/images/icons/ic_library.svg";
-import ImgTu from "../assets/images/tu.jpg";
 import "../assets/css/content_post_input.css";
 import ModalInputPost from "./modal_post_input";
 import { useEffect, useState } from "react";

@@ -27,10 +27,10 @@ export class Post{
     @OneToMany(() => Emotion, emotion => emotion.post)
     emotions: Emotion[];
 
-    @Column({type: 'int'})
+    @Column({type: 'int', default: 0})
     totalEmotion: number;
 
-    @Column({type: 'int'})
+    @Column({type: 'int', default: 0})
     totalComment: number;
 
     @CreateDateColumn({type: 'timestamp'})

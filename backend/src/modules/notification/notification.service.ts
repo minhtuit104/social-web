@@ -1,11 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { IsNull, Not, Repository } from "typeorm";
 import { User } from "../../typeorm/entities/User";
 import { Notification } from "../../typeorm/entities/Notification";
 import { Post } from "../../typeorm/entities/Post";
 import { Comment } from "../../typeorm/entities/Comment";
 import { Emotion } from "src/typeorm/entities/Emotion";
+import { PaginatedResponse } from "../pagination/pagination.interface";
 
 @Injectable()
 export class NotificationService {
@@ -53,12 +54,23 @@ export class NotificationService {
     }
 
     //lấy tất cả thông báo của một người dùng
-    async findAll(id: number): Promise<Notification[]> {
-        return await this.notificationRepository.find({ 
+    async findAll(id: number, page: number = 1, pageSize: number = 10): Promise<PaginatedResponse<Notification>> {
+        const [notifications, total] = await this.notificationRepository.findAndCount({
             where: { receiver: { idUser: id } },
             relations: ['sender', 'post', 'comment'],
             order: { createdAt: 'DESC' },
+            skip: (page - 1) * pageSize,
+            take: pageSize,
          });
+         return {
+            data: notifications,
+            pagination: {
+                total, 
+                last_page: Math.ceil(total / pageSize), 
+                pageSize, 
+                page
+            }
+         };
     }
 
     //đánh dấu thông báo đã đọc
@@ -78,5 +90,46 @@ export class NotificationService {
             throw new Error('Notification not found');
         }
         await this.notificationRepository.delete(id);
+    }
+
+    async createOrUpdateEmotionNotification(post: Post, emotion: Emotion, user: User) {
+        //tìm thông báo có cùng post và emotion
+        const existingNotification = await this.notificationRepository.findOne({
+            where: {
+                sender: { idUser: user.idUser },
+                post: { idPost: post.idPost },
+                receiver: { idUser: post.authorId.idUser },
+                emotion: { idEmotion: Not(IsNull()) }
+            },
+        });
+
+        if(existingNotification){
+            //cập nhật thông báo
+            const emotionType = emotion.emotion || 'removed';
+            //tạo message tùy theo emotion
+            const message = emotionType === 'removed' 
+                ? `${user.name} đã bỏ cảm xúc khỏi bài viết của bạn` 
+                : `${user.name} đã thả ${emotionType} vào bài viết của bạn`;
+            
+            //cập nhật notification trong cơ sở dữ liệu
+            return await this.notificationRepository.save({
+                ...existingNotification,
+                message,
+                emotion,
+                isRead: false,
+                updatedAt: new Date()
+            });
+        }else{
+            //tạo thông báo mới nếu chưa tồn tại
+            const notification = this.notificationRepository.create({
+                sender: user,
+                post,
+                receiver: post.authorId,
+                emotion,
+                message: `${user.name} đã thả ${emotion.emotion} vào bài viết của bạn`,
+                isRead: false
+            });
+            return await this.notificationRepository.save(notification);
+        }
     }
 }
