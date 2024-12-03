@@ -19,6 +19,9 @@ import { UserService } from "../users/user.service";
 import { EmotionModule } from "../emotion/emotion.module";
 import { Emotion } from "src/typeorm/entities/Emotion";
 import { EmotionService } from "../emotion/emotion.service";
+import { FriendModule } from "../friends/friend.module";
+import { Friend } from "src/typeorm/entities/Friend";
+import { FriendService } from "../friends/friend.service";
 @Module({
     imports: [
         forwardRef(() => MessagerModule),
@@ -27,13 +30,15 @@ import { EmotionService } from "../emotion/emotion.service";
         forwardRef(() => NotificationModule),
         forwardRef(() => UserModule),
         forwardRef(() => EmotionModule),
+        forwardRef(() => FriendModule),
         TypeOrmModule.forFeature([Post, User]),
         TypeOrmModule.forFeature([Comment, User, Post]),
         TypeOrmModule.forFeature([Messager, User]),
         TypeOrmModule.forFeature([Notification, User]),
         TypeOrmModule.forFeature([User]),
         TypeOrmModule.forFeature([Emotion, Post, User]),
+        TypeOrmModule.forFeature([Friend, User]),
     ],
-    providers: [MyGateway, PostService, CommentService, MessagerService, NotificationService, UserService, EmotionService],
+    providers: [MyGateway, PostService, CommentService, MessagerService, NotificationService, UserService, EmotionService, FriendService],
 })
 export class GatewayModule {}

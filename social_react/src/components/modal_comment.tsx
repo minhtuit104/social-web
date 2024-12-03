@@ -51,7 +51,7 @@ const ModalComment: React.FC<ModalCommentProps> = ({show, idPost, handleClose, u
     const [hasMore, setHasMore] = useState<boolean>(true);
     const [paginationInfo, setPaginationInfo] = useState<any>(null);
 
-    const socket = useWebSocket();
+    const { socket, isConnected } = useWebSocket();
     const userInfo = getUserFromToken();
     const idUser = userInfo?.idUser;
 
@@ -74,7 +74,7 @@ const ModalComment: React.FC<ModalCommentProps> = ({show, idPost, handleClose, u
 
         try {
             setLoading(true);
-
+            
             const response = await fetchCommentsById(idPost, page);
             if(response && response.success){
                 const { data: {data: newComments, pagination} } = response;
@@ -86,7 +86,7 @@ const ModalComment: React.FC<ModalCommentProps> = ({show, idPost, handleClose, u
                 }
                 setPaginationInfo(pagination);
                 setHasMore(page < pagination.last_page);
-                setTotalComment(pagination.total);
+                //setTotalComment(pagination.total);
             }else{
                 console.log('Error fetching or not comments:', response);
             }
@@ -101,16 +101,18 @@ const ModalComment: React.FC<ModalCommentProps> = ({show, idPost, handleClose, u
         fetchComments();
     }, [idPost, page]);
 
-    //hàm fetch thêm comment
-    const fetchMoreComments = () => {
-        setTimeout(() => {
-            setPage(prevPage => prevPage + 1);
-        }, 1000);
-    }
+    // Reset page khi modal đóng
+    useEffect(() => {
+        if (!show) {
+            setPage(1);
+            setComments([]);
+            setHasMore(true);
+        }
+    }, [show]);
 
     //hàm xử lý sự kiện cập nhật số lượng bình luận của post
     useEffect(() => {
-        if(socket){
+        if(socket && isConnected){
             //lắng nghe sự kiện updateTotalComment
             socket.on('updateTotalComment', (data) => {
                 if(data.postId === idPost){
@@ -220,63 +222,69 @@ const ModalComment: React.FC<ModalCommentProps> = ({show, idPost, handleClose, u
             <Modal.Header closeButton>
             <Modal.Title style={{ display: 'flex', justifyContent: 'center', width: '100%'}}>Comments</Modal.Title>
             </Modal.Header>
-            <Modal.Body style={{ height: '500px', overflowY: 'auto' }}>
-                <InfiniteScroll
-                    dataLength={comments.length}
-                    next={fetchMoreComments}
-                    hasMore={hasMore}
-                    loader={<p style={{textAlign: 'center'}}>Loading more...</p>}
-                    scrollableTarget="modal-body"
-                    endMessage={<p style={{textAlign: 'center'}}>No more comments</p>}
-                >
-                    <>
-                            {comments.map((comment: any) => (
-                                <div key={`comment-${comment.idComment}`}>                   
-                                    <CommentParent
-                                    author={comment.user.name}
-                                    comment={comment.comment}
-                                    createdAt={comment.createdAt}
-                                    avarta={comment.user.avarta ?? 'https://www.gravatar.com/avatar/?d=mp'}
-                                    idComment={comment.idComment}
-                                    onReplyClick={handleShowIdComment}
-                                    />
-                                    {/* Hiển thị form nhập sub-comment*/}
-                                    {commentId === comment.idComment && (                                  
-                                        <div className="subcomment-input">
-                                            <img src={comment.user.avarta ?? 'https://www.gravatar.com/avatar/?d=mp'} alt="Tu" className="avatar-comment"/>
-                                            <input 
-                                            type="text"
-                                            placeholder="Reply comment..." 
-                                            value={newSubComment}
-                                            onChange={(event) => setNewSubComment(event.target.value)}
-                                            />
-
-                                            <button className="send-btn" onClick={() => handleAddSubcomment(comment.idComment)}>
-                                                <img src={IconSend} className="ic-22" alt="Send"/>
-                                            </button> 
-                                        </div>
-                                    )}
-
-                                    {/* hiển thị các sub-comment */}
-                                    {comment.subComments && comment.subComments.length > 0 && (
-                                        <div className="subcomments">
-                                            {comment.subComments.map((subComment: any) => (
-                                                <CommentChild
-                                                key={`subComment-${subComment.idSubcomment}`}
-                                                author={subComment.user.name}
-                                                subcomment={subComment.subcomment}
-                                                createdAt={subComment.createdAt}
-                                                avatar={subComment.user.avarta}
+            <Modal.Body style={{ height: '500px' }}>
+                <div className="list-comment" id="scrollable-comment">
+                    <InfiniteScroll
+                        dataLength={comments.length}
+                        next={() => {
+                            setTimeout(() => {
+                                setPage(prevPage => prevPage + 1);
+                            }, 1000);
+                        }}
+                        hasMore={hasMore}
+                        scrollThreshold={0.8}
+                        loader={<p style={{textAlign: 'center'}}>Loading...</p>}
+                        scrollableTarget="scrollable-comment"
+                    >
+                        <>
+                                {comments.map((comment: any) => (
+                                    <div key={`comment-${comment.idComment}`}>                   
+                                        <CommentParent
+                                        author={comment.user.name}
+                                        comment={comment.comment}
+                                        createdAt={comment.createdAt}
+                                        avarta={comment.user.avarta ?? 'https://www.gravatar.com/avatar/?d=mp'}
+                                        idComment={comment.idComment}
+                                        onReplyClick={handleShowIdComment}
+                                        />
+                                        {/* Hiển thị form nhập sub-comment*/}
+                                        {commentId === comment.idComment && (                                  
+                                            <div className="subcomment-input">
+                                                <img src={comment.user.avarta ?? 'https://www.gravatar.com/avatar/?d=mp'} alt="Tu" className="avatar-comment"/>
+                                                <input 
+                                                type="text"
+                                                placeholder="Reply comment..." 
+                                                value={newSubComment}
+                                                onChange={(event) => setNewSubComment(event.target.value)}
                                                 />
-                                            
-                                            ))}
-                                        </div>
-                                    )}
 
-                                </div>
-                            ))}
-                    </>
-                </InfiniteScroll>
+                                                <button className="send-btn" onClick={() => handleAddSubcomment(comment.idComment)}>
+                                                    <img src={IconSend} className="ic-22" alt="Send"/>
+                                                </button> 
+                                            </div>
+                                        )}
+
+                                        {/* hiển thị các sub-comment */}
+                                        {comment.subComments && comment.subComments.length > 0 && (
+                                            <div className="subcomments">
+                                                {comment.subComments.map((subComment: any) => (
+                                                    <CommentChild
+                                                    key={`subComment-${subComment.idSubcomment}`}
+                                                    author={subComment.user.name}
+                                                    subcomment={subComment.subcomment}
+                                                    createdAt={subComment.createdAt}
+                                                    avatar={subComment.user.avarta}
+                                                    />
+                                                
+                                                ))}
+                                            </div>
+                                        )}
+
+                                    </div>
+                                ))}
+                        </>
+                    </InfiniteScroll>
+                </div>
             </Modal.Body>
             <Modal.Footer>              
                     <img src={user?.avarta ?? 'https://www.gravatar.com/avatar/?d=mp'} alt="Tu" className="avatar-comment"/>

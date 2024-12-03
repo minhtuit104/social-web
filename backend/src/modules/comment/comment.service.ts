@@ -115,7 +115,7 @@ export class CommentService{
         }
     }
 
-    async getCommentsByPost(idPost: number, page: number = 1, pageSize: number = 2): Promise<PaginatedResponse<Comment>> {
+    async getCommentsByPost(idPost: number, page: number = 1, pageSize: number = 6): Promise<PaginatedResponse<Comment>> {
         const [comments, total] = await this.commentRepository.findAndCount({
             where: {post: {idPost: idPost}},
             relations: ['subComments','subComments.user', 'user'],

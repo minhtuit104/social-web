@@ -26,9 +26,15 @@ const getUserFromToken = () => {
   return null;
 };
 
+interface ChatNotificationModalProps {
+  socket: any;
+  userId: number; //id người dùng được chọn
+  position: number; //vị trí của cửa sổ chat trong chatWindow
+  onClose: () => void;
+}
 
-  const ChatNotificationModal = ({ socket }: { socket: any }) => {
-  const [isOpen, setIsOpen] = useState(false);
+const ChatNotificationModal = ({ socket, userId, position, onClose }: ChatNotificationModalProps) => {
+  const [isOpen] = useState(true);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [selectedUserInfo, setSelectedUserInfo] = useState<any>(null);
   const [message, setMessage] = useState<any[]>([]);
@@ -43,7 +49,9 @@ const getUserFromToken = () => {
   const currentUserId = userInfo?.idUser;
 
   // Đóng cửa sổ chat
-  const handleCloseChat = () => setIsOpen(false);
+  const handleCloseChat = () => {
+    onClose();
+  };
 
   //hàm fetch tin nhắn với pagination
   const fetchMessages = async (userId1: number, userId2: number, page: number) => {
@@ -55,11 +63,11 @@ const getUserFromToken = () => {
     try {
       setLoading(true);
       const res = await getMessageWithUser(userId1, userId2, page);
-      console.log("API response: ", res);
+      // console.log("API response: ", res);
       if(res && res.data){
 
         const {data: {data: newMessages, pagination}} = res;
-        console.log("New Messages: ", newMessages);
+        // console.log("New Messages: ", newMessages);
         const updateMessage = newMessages.map((msg: any) => ({
           ...msg,
           own: msg.sender.idUser === userId1,
@@ -71,7 +79,7 @@ const getUserFromToken = () => {
           const sortedMessages = updateMessage.sort((a: any, b: any) => 
             new Date(a.time).getTime() - new Date(b.time).getTime()
           );
-          console.log("Sorted Messages: ", sortedMessages);
+          // console.log("Sorted Messages: ", sortedMessages);
           setMessage(sortedMessages);
         } else {
           setMessage((prevMessages) => {
@@ -108,56 +116,32 @@ const getUserFromToken = () => {
     getUser();
   }, [currentUserId]);
 
-
-  //lắng nghe sự kiện nhận tin nhắn từ socket
+  // fetch tin nhắn và thông tin khi component được mount
   useEffect(() => {
-    if (!socket) {
-      console.warn("Socket is null or undefined");
-      return;
-    }
-      const onConnect = () => {
-        console.log("socket đã kết nối nhé!!<3", socket.connected);
-        //lắng nghe sự kiện nhận tin nhắn từ socket
-        socket?.on('receiveMessage', async (message: any) => {
-          console.log("tin nhắn nhận được: ", message);
-          const senderId = message.sender.idUser;
-          console.log("ID nguoi gui tin nhan: ", senderId);
-
-          setSelectedUserId(senderId); //lưu id của người gửi tin nhắn tới
-
-          //lưu thông tin người gửi tin nhắn vào state
-          setSelectedUserInfo({
-            avarta: message.sender.avarta ?? 'https://www.gravatar.com/avatar/?d=mp',
-            name: message.sender.name,
-          });
-
-          setIsOpen(true); //mở cửa sổ chat
-
-          setPage(1); //reset page về 1
-          //fetch tin nhắn với page 1
-          if(currentUserId){
-            try {
-              await fetchMessages(currentUserId, senderId, 1);
-            } catch (error) {
-              console.error('Failed to fetch message:', error);
-            }
-          }
-
+    const initializeChat = async () => {
+      if(!currentUserId || !userId){
+        return;
+      }
+      try {
+        setLoading(true);
+        const userInfo = await fectchUserName(userId);
+        setSelectedUserInfo({
+          idUser: userId,
+          avarta: userInfo?.avarta ?? 'https://www.gravatar.com/avatar/?d=mp',
+          name: userInfo?.name,
         });
-      };
-      
-      socket.on('connect', onConnect);
-      socket.on('disconnect', () => {
-        console.log("Socket bị ngắt kết nối");
-      });
-        // Cleanup sự kiện khi component unmount
-      return () => {
-        socket?.off('connect', onConnect);
-        socket?.off('disconnect');
-        socket?.off('receiveMessage');
-      };
-  }
-  , [socket, currentUserId]);
+
+        //fetch tin nhắn với page 1
+        setSelectedUserId(userId);
+        await fetchMessages(currentUserId, userId, 1);
+      } catch (error) {
+        console.error("Error initializing chat:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    initializeChat();
+  }, [currentUserId, userId]);
 
   //fetch tin nhắn với pagination
   useEffect(() => {
@@ -188,17 +172,42 @@ const getUserFromToken = () => {
     }
   };
 
+  //lắng nghe sự kiện nhận tin nhắn từ socket
+  useEffect(() => {
+    if(socket && socket.connected){
+        socket?.on('receiveMessage', (message: any) => {
+          console.log("message nhận: ", message);
+          setMessage((prevMessages) => [
+              ...prevMessages,
+                { 
+                    avarta: message.sender.avarta ?? 'https://www.gravatar.com/avatar/?d=mp',
+                    content: message.content,
+                    own: false,
+                    time: new Date(message.createAt).toISOString(),
+
+                }]);
+        });
+        // Cleanup sự kiện khi component unmount
+        return () => {
+        socket?.off('receiveMessage');
+      };     
+    }
+  }, [socket]);
+
   
-
-
   return (<>
-    <div className={`chat-notification ${isOpen ? 'open' : ''}`}>
+    <div className={`chat-notification ${isOpen ? 'open' : ''}`} 
+      style={{ 
+        right: `${position * 300}px`,
+        bottom: '0',
+        display: isOpen ? 'block' : 'none'
+      }}>
       <div className="chat-header">
         <div className="chatHeaderWrapper">
           <img src={selectedUserInfo?.avarta} alt="User Avatar" className="user-avatar" />
           <span>{selectedUserInfo?.name}</span>
         </div>
-        <button className="close-btn" onClick={handleCloseChat}>
+        <button className="close-modal" onClick={handleCloseChat}>
           <img src={IconClose} alt="close"/>
         </button>
       </div>

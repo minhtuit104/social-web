@@ -5,6 +5,7 @@ import IconBookmark from "../assets/images/icons/ic_bookmark.svg";
 import IconHide from "../assets/images/icons/ic_hide.svg";
 import IconReport from "../assets/images/icons/ic_report.svg";
 import IconEdit from "../assets/images/icons/ic_edit.svg";
+import IconDelete from "../assets/images/icons/ic_delete.svg";
 import IconLike from "../assets/images/icons/ic_like-fillsvg.svg";
 import IconLikeDefault from "../assets/images/icons/ic_likedefauth.svg";
 import IconLove from "../assets/images/icons/ic_love.svg";
@@ -18,7 +19,7 @@ import IconShare from "../assets/images/icons/ic_share.svg";
 import { useCallback, useEffect, useRef, useState } from "react";
 import "../assets/css/content_posts.css";
 import ModalComment from "./modal_comment";
-import { fetchPosts } from "../services/PostService";
+import { deletePost, fetchPosts } from "../services/PostService";
 import { formatDistanceToNow } from "date-fns";
 import postEventEmitter from "../patternEventEmitter/postEventEmitter";
 import { addEmotion, getEmotionsByUser } from "../services/EmotionService";
@@ -26,7 +27,8 @@ import { useWebSocket } from "../WebSocket/WebSocketProvider";
 import { useNavigate } from "react-router-dom";
 import { useEmotion } from "./UserContext/EmotionByUserContext";
 import InfiniteScroll from "react-infinite-scroll-component";
-
+import ModalEditPost from "./modal_edit_Post/modal_edit_post";
+import { toast } from "react-toastify";
 //định nghĩa interface
 interface Author {
     idUser: number;
@@ -69,13 +71,38 @@ const Post_item = () =>{
     const [paginationInfo, setPaginationInfo] = useState<PaginationInfo | null>(null);
     const [isShowModalCmt, setIsShowModalCmt] = useState(false)
     const [selectPostId, setSelectPostId] = useState<number | null>(null);
+    const [isShowModalEdit, setIsShowModalEdit] = useState(false);
+    const [selectEditPost, setSelectEditPost] = useState<Post | null>(null);
+    const [isDeletingPost, setIsDeletingPost] = useState(false);
     //hook
     const menuRef = useRef<HTMLDivElement | null>(null);
     const navigate = useNavigate();
-    const socket = useWebSocket();
+    const { socket, isConnected } = useWebSocket();
     const {reactions, setReactions} = useEmotion();
 
+    //hàm giải mã lấy idUser
+    const getUserFromToken = () => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(
+                window
+                .atob(base64)
+                .split('')
+                .map(function (c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                })
+                .join('')
+            );
+            return JSON.parse(jsonPayload);
+    }
+        return null;
+    };
 
+    const user = getUserFromToken();
+
+    
     //hàm chuyển hướng tới trang profile của người dùng
     const handleNavigateToProfile = (idUser: number) => {
         navigate(`/profile/${idUser}`);
@@ -120,8 +147,15 @@ const Post_item = () =>{
             setPosts((prevPosts) => [newPost, ...prevPosts]);
         });
 
+        postEventEmitter.on('updatePost', (updatedPost: Post) => {
+            setPosts((prevPosts) => prevPosts.map(post => 
+                post.idPost === updatedPost.idPost ? updatedPost : post
+            ));
+        });
+
         return () => {
             postEventEmitter.removeAllListeners('postCreated');
+            postEventEmitter.removeAllListeners('updatePost');
         };
     },[])
 
@@ -151,7 +185,7 @@ const Post_item = () =>{
             const currentEmotion = reactions[idPost];
             // Nếu click vào cảm xúc hiện tại, xóa cảm xúc
             const newEmotion = String(currentEmotion) === emotion ? '' : emotion;
-            if(socket){
+            if(socket && isConnected){
                 socket.emit('addEmotion', {
                     idPost,
                     emotion: newEmotion
@@ -211,7 +245,7 @@ const Post_item = () =>{
 
     //hàm lắng nghe sự kiện cập nhật số lượng cảm xúc của post
     useEffect(() => {
-        if(socket){
+        if(socket && isConnected){
             socket.on('receiveNewEmotion', (data) => {
                 setPosts(prevPosts => prevPosts.map(post => 
                     post.idPost === data.idPost 
@@ -233,16 +267,50 @@ const Post_item = () =>{
         setIsMenuContent((prev) => prev === idPost ? null : idPost);
     };
     const handleClickOutside = (event: MouseEvent) => {
-        if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        // Thêm kiểm tra xem click có phải vào nút Edit không
+        const target = event.target as HTMLElement;
+        const isEditButton = target.closest('.menu-post-btn');
+        if (menuRef.current && !menuRef.current.contains(event.target as Node) && !isEditButton) {
             setIsMenuContent(null);
         }
     };
+
+    // Tách riêng hàm xử lý edit để dễ quản lý
+    const handleEditPost = (post: Post) => {
+        console.log('handleEditPost called with post:', post);
+        setSelectEditPost(post);
+        setIsShowModalEdit(true);
+        setIsMenuContent(null);
+    };
+
+    const handleDeletePost = async (post: Post) => {
+        const confirm = window.confirm('Are you sure you want to delete this post?');
+        if(confirm){
+            try {
+                setIsDeletingPost(true);
+                await deletePost(post.idPost);
+                toast.success('Delete post success');
+                //cập nhật lại state posts sau khi xóa post
+                setPosts(prevPosts => prevPosts.filter(p => p.idPost !== post.idPost));
+                //Emit sự kiện để cập nhật lại state posts trên server
+                postEventEmitter.emit('postDeleted', post.idPost);
+                setIsMenuContent(null); //ẩn menu sau khi xóa post
+            } catch (error) {
+                console.error('Error deleting post:', error);
+                toast.error('Delete post failed');
+            } finally {
+                setIsDeletingPost(false);
+            }
+        }
+    }
+
     useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
+
 
     //hàm cập nhật số lượng bình luận của post
     const updateCommentCount = useCallback((postId: number, newCount: number) => {
@@ -323,20 +391,41 @@ const Post_item = () =>{
                                                 <span>Hide this from your news feed.</span>
                                             </div>
                                         </button>
-                                        <button className="menu-post-btn">
-                                            <img src={IconReport} alt="" className="ic-18" />
-                                            <div className="options">
-                                                <div>Report</div>
-                                                <span>We won't let user know who reported this.</span>
-                                            </div>
-                                        </button>
-                                        <button className="menu-post-btn">
-                                            <img src={IconEdit} alt="" className="ic-18" />
-                                            <div className="options">
-                                                <div>Edit</div>
-                                                <span>Edit article as required.</span>
-                                            </div>
-                                        </button>
+                                        {user?.idUser !== post.authorId.idUser && (
+                                            <button className="menu-post-btn">
+                                                <img src={IconReport} alt="" className="ic-18" />
+                                                <div className="options">
+                                                    <div>Report</div>
+                                                    <span>We won't let user know who reported this.</span>
+                                                </div>
+                                            </button>
+                                        )}
+                                        {user?.idUser === post.authorId.idUser && (
+                                            <button className="menu-post-btn" onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleEditPost(post);
+                                            }}>
+                                                <img src={IconEdit} alt="" className="ic-18" />
+                                                <div className="options">
+                                                    <div>Edit</div>
+                                                    <span>Edit article as required.</span>
+                                                </div>
+                                            </button>
+                                        )}
+                                        {user?.idUser === post.authorId.idUser && (
+                                            <button className="menu-post-btn" onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDeletePost(post);
+                                            }} 
+                                            disabled={isDeletingPost}
+                                            >
+                                                <img src={IconDelete} alt="" className="ic-18" />
+                                                <div className="options">
+                                                    <div>Delete</div>
+                                                    <span>Delete post as required.</span>
+                                                </div>
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -434,6 +523,15 @@ const Post_item = () =>{
                     updateCommentCount = {updateCommentCount}
                 />
             )}
+            <ModalEditPost
+                show = {isShowModalEdit}
+                post = {selectEditPost || {} as Post}
+                handleClose = {() => {
+                    console.log('Closing modal');
+                    setIsShowModalEdit(false);
+                    setSelectEditPost(null);
+                }}
+            />
         </InfiniteScroll>
         </>
     );

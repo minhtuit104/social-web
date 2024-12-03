@@ -16,6 +16,7 @@ import { PostService } from '../posts/post.service';
 import { NotificationService } from '../notification/notification.service';
 import { UserService } from '../users/user.service';
 import { EmotionService } from '../emotion/emotion.service';
+import { FriendService } from '../friends/friend.service';
 
 @WebSocketGateway({
   cors: {
@@ -34,6 +35,7 @@ export class MyGateway implements OnGatewayConnection, OnGatewayDisconnect{
     private readonly notificationService: NotificationService,
     private readonly userService: UserService,
     private readonly emotionService: EmotionService,
+    private readonly friendService: FriendService
   ) {}
 
   // Hàm này sẽ được gọi khi client kết nối
@@ -195,6 +197,47 @@ export class MyGateway implements OnGatewayConnection, OnGatewayDisconnect{
     }catch(error){
       throw new Error('Failed to handle add emotion');
     }
+  }
+
+  @SubscribeMessage('addFriend')
+  async handleAddFriend(
+    @MessageBody() data: { idUser: number },
+    @ConnectedSocket() client: Socket
+  ) {
+    const senderId = client.data.idUser;
+    try{
+      //gửi lời mời kết bạn
+      const friendRequest = await this.friendService.sendFriendRequest(senderId, data.idUser);
+
+      //lấy thông tin người gửi và người nhận
+      const sender = await this.userService.findOne(senderId);
+      const receiver = await this.userService.findOne(data.idUser);
+
+      //tạo thông báo khi có lời mời kết bạn
+      const notification = await this.notificationService.createFriendRequestNotification(sender, receiver);
+
+      //gửi sự kiện lời mời kết bạn đến người nhận
+      const receiverSocket = this.getSocketByUserId(data.idUser);
+      if(receiverSocket){
+        this.server.to(receiverSocket.id).emit('receiveFriendRequest', {
+          notification: notification,
+          sender: {
+            idUser: sender.idUser,
+            name: sender.name,
+            avarta: sender.avarta
+          }
+        });
+      }
+
+      return {
+        status: 'success',
+        message: 'Friend request sent successfully',
+        data: friendRequest
+      };
+    }catch(error){
+      throw new Error('Failed to handle add friend');
+    }
+
   }
 
   //lấy socket theo id người dùng theo idUser

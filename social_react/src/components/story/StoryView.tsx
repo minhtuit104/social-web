@@ -133,13 +133,13 @@ const StoryView: React.FC<StoryViewProps> = ({stories, onClose, onNextUser, onPr
                         ))}
                     </div>
                     <div className="user-info">
-                        <img src={currentStory.authorId.avarta} alt="user" />
+                        <img src={currentStory.authorId.avarta ?? 'https://www.gravatar.com/avatar/?d=mp'} alt="user" />
                         <span>{currentStory.authorId.name}</span>
                         <span className="time-ago">{formatTime(currentStory.createdAt)}</span>
                     </div>
-                    <button className="close-btn" onClick={onClose}>
+                    <button className="close-btn-str" onClick={onClose}>
                         <div className="close-icon">
-                            <img src={closeIcon} alt="close" className="ic-22"/>
+                            <img src={closeIcon} alt="close" className="ic-22 ic-close"/>
                         </div>
                     </button>
                 </div>

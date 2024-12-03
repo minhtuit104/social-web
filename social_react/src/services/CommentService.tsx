@@ -20,7 +20,7 @@ export interface PaginationInfo {
 
 
 
-const fetchCommentsById = async (idPost: number, page: number = 1, pageSize: number = 2): Promise<ApiResponse<any>> => {
+const fetchCommentsById = async (idPost: number, page: number = 1, pageSize: number = 6): Promise<ApiResponse<any>> => {
     const token = localStorage.getItem('token');
 
     if(!token){

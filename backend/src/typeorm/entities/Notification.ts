@@ -3,6 +3,7 @@ import { User } from "./User";
 import { Post } from "./Post";
 import { Comment } from "./Comment";
 import { Emotion } from "./Emotion";
+import { Friend } from "./Friend";
 @Entity('notifications')
 export class Notification {
     @PrimaryGeneratedColumn()
@@ -27,6 +28,9 @@ export class Notification {
     //nếu thông báo liên quan đến cảm xúc
     @ManyToOne(() => Emotion, {nullable: true, onDelete: 'CASCADE'})
     emotion: Emotion;
+
+    //nếu thông báo liên quan đến lời mời kết bạn
+    //  
     
     //nội dung thông báo
     @Column('text')

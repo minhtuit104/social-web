@@ -59,15 +59,28 @@
     color: #ccc;
 }
 
-.close-btn {
+.close-btn-str {
     position: absolute;
-    top: 20px;
+    top: 30px;
     right: 20px;
     background: none;
     border: none;
-    color: white;
     font-size: 24px;
     cursor: pointer;
+}
+
+.close-icon{
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #3b3b3b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ic-close{
+    filter: brightness(0) invert(1);
 }
 
 .story-content {

@@ -1,4 +1,4 @@
-import Avartar from "../assets/images/tu.jpg";
+
 import IconNew from "../assets/images/icons/ic_news.svg";
 import IconMessage from "../assets/images/icons/ic_message.svg";
 import IconFriend from "../assets/images/icons/ic_friends.svg";
@@ -25,7 +25,7 @@ const NavBar = () => {
     const [avarta, setAvarta] = useState<string | null>(null);
     const [showModalNotification, setShowModalNotification] = useState(false);//hiển thị modal thông báo
     const [showModalFriends, setShowModalFriends] = useState(false);//hiển thị modal bạn bè
-    const socket = useWebSocket();
+    const { socket, isConnected } = useWebSocket();
     const [messageCount, setMessageCount] = useState(0);
     const [notificationCount, setNotificationCount] = useState(0);
     const [friendRequestCount, setFriendRequestCount] = useState(0);
@@ -34,10 +34,10 @@ const NavBar = () => {
 
     
     useEffect(() => {
-        if(socket){
-            socket.on('receiveMessage', (data) => {
-                setMessageCount(prevCount => prevCount + 1);
-            }); 
+        if(socket && isConnected){
+            // socket.on('receiveMessage', (data) => {
+            //     setMessageCount(prevCount => prevCount + 1);
+            // }); 
             socket.on('receiveNewComment', (data) => {
                 setNotificationCount(prevCount => prevCount + 1);
             });
@@ -51,13 +51,13 @@ const NavBar = () => {
 
         return () => {
             if(socket){
-                socket.off('receiveMessage');
+                //socket.off('receiveMessage');
                 socket.off('receiveNewComment');
                 socket.off('receiveNewEmotion');
                 socket.off('receiveFriendRequest');
             }
         }
-    }, [socket]);
+    }, [socket, isConnected]);
 
     
     const toggleModalFriends = () => {
@@ -135,7 +135,7 @@ const NavBar = () => {
     const navigate = useNavigate();
     const handleLogout = () => {
         localStorage.removeItem("token");
-        navigate("/");
+        window.location.href = "/";
         toast.success("Logout success!")
     }
     const handleProfile = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {

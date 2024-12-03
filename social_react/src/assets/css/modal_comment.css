@@ -1,5 +1,25 @@
 @import url(./styles.css);
 
+.list-comment{
+    height: 483px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Thêm style cho scrollbar nếu cần */
+.list-comment::-webkit-scrollbar {
+    width: 6px;
+}
+
+.list-comment::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.list-comment::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
 .modal-body .comment-parent{
     margin-bottom: 10px;
     background-color: rgba(206, 206, 206, 0.5);
@@ -105,34 +125,46 @@
 
 .subcomment-input{
     position: relative;
+    display: flex;
+    align-items: center;
     margin-bottom: 10px;
-    margin-left: 100px;
+    margin-left: 66px;
+}
+.subcomment-input img.avatar-comment{
+    width: 40px; /* Kích thước avatar nhỏ hơn comment chính */
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 .subcomment-input input{
-    padding: 10px;
-    border-radius: 8px;
-    width: 590px;
+    flex: 1;
+    padding: 10px 40px 10px 15px;
+    border-radius: 14px;
     border: none;
     outline: none;
     background: var(--white4);
+    font-size: 14px;
 }
 .subcomment-input .send-btn{
     position: absolute;
-    right: 0;
-    top: 14%;
-    margin-right: 5px;
+    right: 8px;
+    top: 4px;
     border: none;
     background: none;
     cursor: pointer;
-    padding: 4px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .comment-child{
+    padding: 10px;
     background-color: rgba(206, 206, 206, 0.5);
-    margin-bottom: 10px;
+    margin: 10px 0;
     border-radius: 12px;
+    margin-left: 66px;
 }
 .subcomments{
-    display: flex;
-    flex-direction: column;
+    margin-top: 10px;
 }

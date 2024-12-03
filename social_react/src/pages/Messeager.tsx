@@ -33,7 +33,7 @@ const getUserFromToken = () => {
 
 
 const Messeager = () => {
-    const socket = useWebSocket();
+    const { socket, isConnected } = useWebSocket();
     const [user, setUser] = useState([]); //khởi tạo danh sách user
     const [selectedUserId, setSelectedUserId] = useState<number | null>(null); //lưu idUser của ngyời nhận
     const [selectedUserInfo, setSelectedUserInfo] = useState<any>(null); //lưu thông tin của người nhận
@@ -61,7 +61,7 @@ const Messeager = () => {
 
     //hàm gửi tin nhắn
     const sendMessage = () => {
-        if(selectedUserId && newMessage.trim() && socket?.connected){
+        if(selectedUserId && newMessage.trim() && isConnected){
             socket?.emit('sendMessage',{
                 receiverId: selectedUserId,
                 content: newMessage
@@ -119,26 +119,6 @@ const Messeager = () => {
             console.error('Failed to fetch user name:', error)
         }
     };
-
-    //hàm load thêm tin nhắn
-    // const handleLoadMore = () => {
-    //     //kiểm tra xem có load thêm tin nhắn hay không
-    //     console.log('Đang load thêm tin nhắn: ', {loading, hasMore});
-    //     if(loading || !hasMore){
-    //         console.log('Không load thêm tin nhắn nữa: ', {loading, hasMore});
-    //         return;
-    //     };
-    //     setTimeout(() => {
-    //         setPage(prevPage => prevPage + 1);
-    //     }, 1000);
-    // }
-
-    //hàm scroll xuống tin nhắn mới nhất
-    // const scrollToBottom = () => {
-    //     if(chatBoxTopRef.current){
-    //         chatBoxTopRef.current.scrollTop = chatBoxTopRef.current.scrollHeight;
-    //     }
-    // };
 
     //hàm fetch message với pagination
     const fetchMessages = async (userId1: number, userId2: number, page: number) => {
@@ -213,14 +193,9 @@ const Messeager = () => {
     };
 
     useEffect(() => {
-
         if(currentUserId && selectedUserId && page > 1){
             fetchMessages(currentUserId, selectedUserId, page);
         }
-        //scroll xuống tin nhắn mới nhất
-        // if(message.length > 0){
-        //     scrollToBottom();
-        // }
     }, [page, currentUserId, selectedUserId]);
     
 

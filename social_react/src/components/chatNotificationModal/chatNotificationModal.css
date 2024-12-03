@@ -17,6 +17,7 @@
   
   .chat-notification.open {
     display: flex;
+    z-index: 1000;
   }
   
   .chat-header {
@@ -33,6 +34,8 @@
   .chatHeaderWrapper {
     display: flex;
     align-items: center;
+    gap: 10px;
+
   }
   
   .user-avatar {
@@ -44,9 +47,9 @@
   }
 
   .chat-body {
-    flex: 1;
     padding: 10px 3px 10px 10px;
     overflow: hidden;
+    height: 292px;
     /* display: flex;
     flex-direction: column; */
   }
@@ -111,14 +114,14 @@
     border-radius: 5px;
   }
   
-  .close-btn {
+  .close-modal {
     background-color: transparent;
     border: none;
     color: white;
     cursor: pointer;
   }
    
-  .close-btn img {
+  .close-modal img {
     width: 28px;
     height: 28px;
     filter: brightness(0) invert(1);

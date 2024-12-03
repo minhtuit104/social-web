@@ -5,7 +5,6 @@ export class UpdatePostDto {
     // @IsNotEmpty({message: 'idPost không được để trống'})
     // idPost: number;
     @ApiProperty()
-    @IsNotEmpty({message: 'title không được để trống'})
     title?: string;
 
     @ApiProperty()

@@ -15,8 +15,8 @@ import { EmotionProvider } from './components/UserContext/EmotionByUserContext';
 function App() {
   return (
     <WebSocketProvider>
-      <UserProvider>
-        <EmotionProvider>
+      <UserProvider> {/* cung cấp avatar cho các component sử dụng */}
+        <EmotionProvider> 
           <div className="App">
             <Routes>
               {/* khi đã đăng nhập thì không đueọc vào trang Login */}

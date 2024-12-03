@@ -1,7 +1,8 @@
 import IconPlus from "../assets/images/icons/ic_plus.svg";
-import IconArrowRight from "../assets/images/icons/ic_arrow-right.svg";
+import IconArrowRight from "../assets/images/icons/ic_next.svg";
+import IconArrowLeft from "../assets/images/icons/ic_pre_right1.svg";
 import "../assets/css/right_bar.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ModalCreateStory from "../components/modal_create_story/modal_create_story";
 import { fetchAllStories, isStoryActive } from "../services/StoryService";
 import StoryItem from "./story/Story_item";
@@ -39,7 +40,9 @@ const Stories = () => {
     const [selectedUserStories, setSelectedUserStories] = useState<any[]>([]); //state để lưu stories của user được chọn
     const [loading, setLoading] = useState(false);
     const [currentUserId, setCurrentUserId] = useState<number | null>(null); //id của user mà mình xem story
-    //const [currentUser, setCurrentUser] = useState<number>(1); 
+    const storiesBodyRef = useRef<HTMLDivElement>(null);
+    const [showArrowLeft, setShowArrowLeft] = useState(false);
+
 
     const user = getUserFromToken();
     const currentUser = user?.idUser;
@@ -58,7 +61,7 @@ const Stories = () => {
             acc[userId].push(story);
             return acc;
         }, {});
-        console.log('Grouped Stories: ', grouped);
+        // console.log('Grouped Stories: ', grouped);
         setGroupStories(grouped);
     }, [stories]);
 
@@ -79,11 +82,12 @@ const Stories = () => {
         };
     }, []);
 
+    //hàm load stories 
     const loadStories = async () => {
         try {
             setLoading(true);
             const response = await fetchAllStories();
-            console.log('danh sach cac story: ', response);
+            // console.log('danh sach cac story: ', response);
             if (response && response.data) {
                 const validStories = response.data.map((story: any) => ({
                     ...story,
@@ -170,7 +174,7 @@ const Stories = () => {
                     >
                         <StoryItem 
                             story={myStories[0]}
-                            isCurrentUser={true} // Thêm prop để style khác biệt nếu cần
+                            isCurrentUser={true} 
                         />
                     </div>
                 )}
@@ -191,35 +195,80 @@ const Stories = () => {
         );
     };
 
+    // hàm kiểm tra xem có hiển thị mũi tên scroll left hay không
+    useEffect(() => {
+        const checkShowArrowLeft = () => {
+            if(storiesBodyRef.current){
+                const scrollLeft = storiesBodyRef.current.scrollLeft;
+                setShowArrowLeft(scrollLeft > 0);
+            }
+        }
+        const storiesBody = storiesBodyRef.current;
+        if(storiesBody){
+            storiesBody.addEventListener('scroll', checkShowArrowLeft);
+            window.addEventListener('resize', checkShowArrowLeft);
+        }
+        return () => {
+            if(storiesBody){
+                storiesBody.removeEventListener('scroll', checkShowArrowLeft);
+                window.removeEventListener('resize', checkShowArrowLeft);
+            }
+        };
+    }, [stories]);
+
+    //hàm xử lý scroll right
+    const handleScrollRight = () => {
+        if(storiesBodyRef.current){
+            const scrollAmount = 2000;
+            storiesBodyRef.current.scrollBy({
+                left: scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    };
+
+    //hàm xử lý scroll left
+    const handleScrollLeft = () => {
+        if(storiesBodyRef.current){
+            storiesBodyRef.current.scrollBy({
+                left: -2000,
+                behavior: 'smooth'
+            });
+        }
+    };
+
     return (<>
             <div className="right-sidebar">
                 <div className="stories">
                     <div className="stories-header">
                         <h3>Stories</h3>
                     </div>
-                    <div className="stories-body">
-                        <div className="story-item" onClick={() => setShowCreateStoryModal(true)}>
-                            <div className="create-story">
-                                <div className="ic-create-str">
-                                    <img src={IconPlus} alt="create" className="ic-22"/>
-                                </div>
-                                <div className="document">
-                                    Create story
+                    <div className = "stories-wrapper">
+                        {/* hiển thị mũi tên scroll left */}
+                        {showArrowLeft && (
+                            <div className="arrow-left" onClick={handleScrollLeft}>
+                                <img src={IconArrowLeft} alt="arrow-left" className="ic-22"/>
+                            </div>
+                        )}
+                        <div className="stories-body" ref={storiesBodyRef}>
+                            <div className="story-item" onClick={() => setShowCreateStoryModal(true)}>
+                                <div className="create-story">
+                                    <div className="ic-create-str">
+                                        <img src={IconPlus} alt="create" className="ic-22"/>
+                                    </div>
+                                    <div className="document">
+                                        Create story
+                                    </div>
                                 </div>
                             </div>
+                            
+                            {/* render list story */}
+                            {renderStoriesList()}
+
                         </div>
-                        {/* <div className="stories-list">
-                            {Object.entries(groupStories).map(([userId, userStories]) => (
-                                    <div key={`story-${userId}`} onClick={() => handleStoryClick(Number(userId))}>
-                                        <StoryItem 
-                                            story={(userStories as any[])[0]} 
-                                        />
-                                    </div>
-                            ))}
-                        </div> */}
-                        {renderStoriesList()}
-                        <div className="arrow-right">
-                            <img src={IconArrowRight} alt="Next" className="ic-18"/>
+                        {/* hiển thị mũi tên scroll right */}
+                        <div className="arrow-right" onClick={handleScrollRight}>
+                            <img src={IconArrowRight} alt="arrow-right" className="ic-22"/>
                         </div>
                     </div>
                 </div>

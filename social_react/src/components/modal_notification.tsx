@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import NotificationItem from "./notification_item/Notification_item";
 import fetchNotificationsByIdUser from "../services/NotificationService";
 import 'animate.css';
-import ModalDetailPost from "./modal_detail_post/Modal_detail_post";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 interface ModalNotificationProps {
@@ -15,7 +14,7 @@ interface ModalNotificationProps {
 
 const ModalNotification: React.FC<ModalNotificationProps> = ({show, handleClose, onShowPost}) => {
     const Ref = useRef<HTMLDivElement>(null);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(false);
     const [notifications, setNotifications] = useState<any[]>([]);
     const [isClosing, setIsClosing] = useState<boolean>(false);
     const [page, setPage] = useState<number>(1);
@@ -49,7 +48,8 @@ const ModalNotification: React.FC<ModalNotificationProps> = ({show, handleClose,
 
 
     const loadNotifications = async () => {
-        if(!loading){
+        if(loading){
+            console.log("Đang tải thông báo...");
             return;
         };
 
@@ -59,6 +59,8 @@ const ModalNotification: React.FC<ModalNotificationProps> = ({show, handleClose,
 
             if(response && response.data){
                 const { data: { data: newNotifications, pagination } } = response;
+                console.log("Danh sach thong bao:", newNotifications);
+                console.log("Page hiện tại:", page);
 
                 if(page === 1){
                     console.log('Danh sach thong bao:', newNotifications);
@@ -79,14 +81,6 @@ const ModalNotification: React.FC<ModalNotificationProps> = ({show, handleClose,
     useEffect(() => {
         loadNotifications();
     }, [idUser, page]);
-
-    //hàm load thêm thông báo
-    const loadMoreNotifications = () => {
-        if(loading || !hasMore) return;
-        setTimeout(() => {
-            setPage(prev => prev + 1);
-        }, 1000);
-    }
 
     const handleCloseWithAnimation = () => {
         setIsClosing(true);
@@ -133,17 +127,21 @@ const ModalNotification: React.FC<ModalNotificationProps> = ({show, handleClose,
                 <span>Notifications</span>
                 <button onClick={handleCloseWithAnimation}><img src={IconClose} alt="close" className="ic-22" /></button>
             </div>
-            <div className="notification-content">
+            <div className="notification-content" id="scrollableContent">
                 <InfiniteScroll
                     dataLength={notifications.length}
-                    next={loadMoreNotifications}
+                    next={() => {
+                        setTimeout(() => {
+                            setPage(prevPage => prevPage + 1);
+                        }, 1000);
+                    }}
                     hasMore={hasMore}
-                    loader={<div className="loading-indicator" style={{textAlign: 'center'}}>Loading more...</div>}
+                    scrollThreshold={0.8}
+                    scrollableTarget="scrollableContent"
+                    loader={<div className="loading-indicator" style={{textAlign: 'center'}}>Loading...</div>}
                     endMessage={<div className="end-message" style={{textAlign: 'center'}}>No more notifications</div>}
                 >
-                    {loading ? (
-                        <div className="loading-indicator">Đang tải thông báo...</div>
-                    ) : notifications.length > 0 ? (
+                    { notifications.length > 0 ? (
                         <div className="notification-list">
                             {notifications.map((notification: any) => (
                                 <NotificationItem 

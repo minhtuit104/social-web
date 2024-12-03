@@ -8,6 +8,7 @@ import { fectchUserName } from "../../services/UserService";
 import ImgAddFriend from "../../assets/images/icons/ic_addfriend.svg";
 import { cancelFriendRequest, checkFriendshipStatus, deleteFriend, sendFriendRequest } from "../../services/FriendService";
 import ModalUpdateAvatar from "./modal_updateAvatar";
+import { useWebSocket } from "../../WebSocket/WebSocketProvider";
 
 interface ProfileHeaderProps {
     idUser: number | undefined;
@@ -35,6 +36,7 @@ const getUserFromToken = () => {
 
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({idUser}) => {
+    const { socket, isConnected } = useWebSocket();
     const [avarta, setAvarta] = useState<string | null>(null);
     const [name, setName] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -77,7 +79,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({idUser}) => {
     const handleAddFriend = async () => {
         if(idUser){
             try {
-                await sendFriendRequest(idUser);
+                if(socket && isConnected){
+                    socket.emit('addFriend', {
+                        idUser: idUser
+                    });
+                } else {
+                    await sendFriendRequest(idUser);
+                }
+                
                 setFriendshipStatus('pending'); //cập nhật trạng thái kết bạn thành công
             } catch (error) {
                 console.error('Failed to send friend request:', error);

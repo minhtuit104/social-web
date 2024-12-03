@@ -41,6 +41,14 @@
 .notification-content {
     flex-grow: 1;
     overflow-y: auto; /* Cho phép cuộn khi nội dung nhiều */
+    max-height: calc(100vh - 60px);
+    padding-bottom: 20px;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+}
+
+.infinite-scroll-component {
+    overflow: hidden !important;
 }
 
 .notification-list{

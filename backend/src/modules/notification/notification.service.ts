@@ -132,4 +132,15 @@ export class NotificationService {
             return await this.notificationRepository.save(notification);
         }
     }
+
+    //tạo thông báo khi có lời mời kết bạn
+    async createFriendRequestNotification(sender: User, receiver: User): Promise<Notification> {
+        const notification = new Notification();
+        notification.sender = sender;
+        notification.receiver = receiver;
+        notification.message = `${sender.name} đã gửi cho bạn lời mời kết bạn`;
+        notification.isRead = false;
+
+        return await this.notificationRepository.save(notification);
+    }
 }

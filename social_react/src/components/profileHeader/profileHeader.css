@@ -16,7 +16,6 @@
     width: 100%;
     height: 250px;
     object-fit: cover;
-    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
 }
 
 .profileHeader-AvatarImg {
@@ -46,8 +45,7 @@
     background-color: #fff;
     padding: 10px;
     border-radius: 10px;
-    box-shadow: 0 0 10px 0  rgba(0, 0, 0, 0.5);
-    border-left: 3px solid #ccc;
+    border: 2px solid #ccc;
 }
 
 .profileHeader-Info-Top {

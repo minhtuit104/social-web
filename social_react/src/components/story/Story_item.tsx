@@ -21,7 +21,7 @@ const StoryItem: React.FC<StoryItemProps> = ({story, isCurrentUser = false}) => 
             <div className="story-item">
                 <img src={story.image} alt="story-img" />
                 <div className="story-info">
-                    <img src={story.authorId.avarta} alt="taminhtu" />
+                    <img src={story.authorId.avarta ?? 'https://www.gravatar.com/avatar/?d=mp'} alt="taminhtu" />
                     <span>{isCurrentUser ? 'Your story' : story.authorId.name}</span>
                 </div>
             </div>

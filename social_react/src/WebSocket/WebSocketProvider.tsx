@@ -1,8 +1,14 @@
 import React, { createContext, useContext, useEffect, ReactNode, useMemo, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
 
-// Context để quản lý kết nối WebSocket
-const WebSocketContext = createContext<Socket | null>(null);
+// Thêm interface để định nghĩa kiểu dữ liệu cho context
+interface WebSocketContextType {
+  socket: Socket | null;
+  isConnected: boolean;
+}
+
+// Cập nhật kiểu dữ liệu cho context
+const WebSocketContext = createContext<WebSocketContextType | null>(null);
 
 interface WebSocketProviderProps {
   children: ReactNode; // Định nghĩa kiểu cho prop children
@@ -10,58 +16,49 @@ interface WebSocketProviderProps {
 
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
-
-
-  // const socket = useMemo(() => {
-  //   const token = localStorage.getItem('token');
-  //   if(token){
-  //   const newSocket = io('http://localhost:3000', {
-  //       auth: { token: token }, 
-  //       reconnection: true,
-  //       reconnectionAttempts: 5,
-  //       reconnectionDelay: 1000,
-  //     });
-  //     return newSocket;
-  //   }
-  //   return null;
-  // }, []);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
     const newSocket = io('http://localhost:3000', {
-        auth: { token: token }, 
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-      });
+      auth: {
+        token: localStorage.getItem('token')
+      }
+    });
 
-    setSocket(newSocket);
     // Lắng nghe sự kiện kết nối thành công
     newSocket.on('connect', () => {
-      console.log('Socket connected');
+      console.log('Socket connected in provider ~!!!');
+      setIsConnected(true);
     });
 
     // Lắng nghe sự kiện mất kết nối
-    newSocket.on('disconnect', () => {
-      console.log('Socket disconnected');
+    newSocket.on('disconnect', (error) => {
+      console.log('Socket disconnected in provider ~!!!', error);
+      setIsConnected(false);
     });
+    
+    setSocket(newSocket);
         
     // Cleanup khi component bị unmount
     return () => {
       if (newSocket) {
-        newSocket.disconnect();
+        newSocket.close();
       }
     };
   }, []);
 
   return (
-    <WebSocketContext.Provider value={socket}>
+    <WebSocketContext.Provider value={{socket, isConnected}}>
       {children} {/* Render children */}
     </WebSocketContext.Provider>
   );
 };
 
 // Hook để sử dụng WebSocket trong các component con
-export const useWebSocket = () => {
-  return useContext(WebSocketContext);
+export const useWebSocket = (): WebSocketContextType => {
+  const context = useContext(WebSocketContext);
+  if (!context) {
+    throw new Error('useWebSocket must be used within a WebSocketProvider');
+  }
+  return context;
 };

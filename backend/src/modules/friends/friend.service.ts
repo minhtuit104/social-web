@@ -49,10 +49,6 @@ export class FriendService {
             where: {user: {idUser: friendId}, friend: {idUser: userId}, status: 'pending'}
         });
 
-        if(!friendRequest) {
-            throw new NotFoundException('Lời mời kết bạn không tồn tại');
-        }
-
         friendRequest.status = 'accepted';
         return this.friendRepository.save(friendRequest);
     }

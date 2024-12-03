@@ -84,7 +84,7 @@ export class CommentController {
     async getCommentsByPost(
         @Param('idPost') idPost: number,
         @Query('page', ParseIntPipe) page: number = 1,  
-        @Query('pageSize', ParseIntPipe) pageSize: number = 2,
+        @Query('pageSize', ParseIntPipe) pageSize: number = 6,
         @Response() res
     ){
         const result = await this.commentService.getCommentsByPost(idPost, page, pageSize);

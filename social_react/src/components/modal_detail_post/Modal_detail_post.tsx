@@ -72,7 +72,7 @@ const ModalDetailPost: React.FC<ModalDetailPostProps> = ({
     const [hasMore, setHasMore] = useState<boolean>(true);
     const [paginationInfo, setPaginationInfo] = useState<any>(null);
 
-    const socket = useWebSocket();
+    const { socket, isConnected } = useWebSocket();
     const userInfo = getUserFromToken();
     const idUser = userInfo?.idUser;
 
@@ -124,7 +124,7 @@ const ModalDetailPost: React.FC<ModalDetailPostProps> = ({
     
     //hàm xử lý sự kiện cập nhật số lượng bình luận của post
     useEffect(() => {
-        if(socket){
+        if(socket && isConnected){
             //lắng nghe sự kiện updateTotalComment
             socket.on('updateTotalComment', (data) => {
                 if(data.postId === idPost){
@@ -136,7 +136,7 @@ const ModalDetailPost: React.FC<ModalDetailPostProps> = ({
         }
 
         return () => {
-            if(socket){
+            if(socket && isConnected){
                 socket.off('updateTotalComment');
             }
         }
@@ -149,7 +149,7 @@ const ModalDetailPost: React.FC<ModalDetailPostProps> = ({
             return;
         }
         try {
-            if (socket) {
+            if (socket && isConnected) {
                 socket.emit('newComment', {
                     idPost,
                     comment: newComment
@@ -314,9 +314,7 @@ const ModalDetailPost: React.FC<ModalDetailPostProps> = ({
                             loader={<p style={{textAlign: 'center'}}>Loading...</p>}
                             endMessage={<p style={{textAlign: 'center'}}>No more comments</p>}
                         >
-                            {loading ? (
-                                <p>Loading comments...</p>
-                            ): comments.length > 0 ? (
+                            {comments.length > 0 ? (
                                 comments.map((comment: any) => (
                                     <div key={`comment-${comment.idComment}`}>                   
                                         <CommentParent

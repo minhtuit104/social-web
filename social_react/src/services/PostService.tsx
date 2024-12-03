@@ -61,4 +61,42 @@ const fetchPostByIdUser = async (idUser: number, page: number = 1, pageSize: num
     }
 }
 
-export {fetchPosts, createPost, fetchPostByIdUser};
+const updatePost = async (idPost: number, postData: any) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        throw new Error('Token is missing');
+    }
+    
+    try {
+        const response = await axios.put(`/api/v1/posts/${idPost}`, postData, {
+            headers: {
+                Authorization: `Bearer ${token}` 
+            }
+        });
+        return response;
+    } catch (error) {
+        console.error('Error updating post:', error);
+        throw error;
+    }
+}
+
+const deletePost = async (idPost: number) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        throw new Error('Token is missing');
+    }
+
+    try {
+        const response = await axios.delete(`/api/v1/posts/${idPost}`, {
+            headers: {
+                Authorization: `Bearer ${token}` 
+            }
+        });
+        return response;
+    } catch (error) {
+        console.error('Error deleting post:', error);
+        throw error;
+    }
+}
+
+export {fetchPosts, createPost, fetchPostByIdUser, updatePost, deletePost};

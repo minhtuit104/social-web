@@ -16,11 +16,13 @@ const Login = () => {
     };
     const loginLink = () => {
         setAction('');
+        navigate("/login");
     };
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isShowPassword, setIsShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
 
@@ -30,20 +32,28 @@ const Login = () => {
             toast.error("'Email/Password is required!!'");
             return;
         }
+    
+        setIsLoading(true); 
+
         try {
             let res = await loginApi(email, password);
-            console.log("check res: ", res); 
+            // console.log("check res: ", res); 
             if(res && res.data.access_token){
                 localStorage.setItem("token", res.data.access_token);
+                setTimeout(() => {
+                    setIsLoading(false);
+                    window.location.href = "/home";
+                }, 500);
                 toast.success("Login successful!");
-                navigate("/home",{ replace: true});
             }else {
                 if(res && res.status === 400){
                     toast.error(res.data.message.message);
                 };
+                setIsLoading(false);
             }    
         } catch (err) {
             console.error("Login error:", err);
+            setIsLoading(false);
         }
     }
 
@@ -112,9 +122,13 @@ const Login = () => {
                                 <p>Forgot password?</p>
                             </a>
 
-                            <button type="submit" className={email && password ? "showlogin" : ""}
-                            // onClick={() => handleLogin()}
-                            >Login</button>
+                            <button 
+                                type="submit" 
+                                className={email && password ? "showlogin" : ""}
+                                disabled={isLoading}
+                            >
+                                {isLoading ? 'Loading...' : 'Login'}
+                            </button>
 
                             <div className="registerLink">
                                 <p>Don't have an account? <a href="#register" className="register" onClick={registerLink}>Register</a></p>
@@ -169,7 +183,7 @@ const Login = () => {
                             <button type="submit" className="login">Register</button>
 
                             <div className="registerLink">
-                                <p>Already have an account? <a href="/" className="register" onClick={loginLink}>Login</a></p>
+                                <p>Already have an account? <a href="#" className="register" onClick={loginLink}>Login</a></p>
                             </div>
                         </form>
                     </div>

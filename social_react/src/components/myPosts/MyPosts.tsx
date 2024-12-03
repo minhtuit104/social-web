@@ -13,19 +13,23 @@ import IconSad from "../../assets/images/icons/ic_sad.svg";
 import IconAngry from "../../assets/images/icons/ic_angry.svg";
 import IconCmt from "../../assets/images/icons/ic_comment.svg";
 import IconShare from "../../assets/images/icons/ic_share.svg";
+import IconDelete from "../../assets/images/icons/ic_delete.svg";
 import '../../assets/css/content_posts.css';
 import { useCallback, useEffect, useRef, useState } from "react";
 import ModalComment from "../modal_comment";
-import { fetchPostByIdUser } from "../../services/PostService";
+import { deletePost, fetchPostByIdUser } from "../../services/PostService";
 import { formatDistanceToNow } from "date-fns";
 import postEventEmitter from "../../patternEventEmitter/postEventEmitter";
 import { addEmotion } from "../../services/EmotionService";
 import { useWebSocket } from "../../WebSocket/WebSocketProvider";
 import { useUser } from "../UserContext/UserContext";
 import InfiniteScroll from "react-infinite-scroll-component";
+import ModalEditPost from "../modal_edit_Post/modal_edit_post";
+import { toast } from "react-toastify";
 
 
 interface Author {
+    idUser: number;
     avarta: string;
     name: string;
   } 
@@ -59,7 +63,7 @@ const privacyIcons: { [key: string]: string } = {
 const MyPosts: React.FC<MyPostsProps> = ({idUser}) => {
     const menuRef = useRef<HTMLDivElement | null>(null);
     const { userAvatar } = useUser();
-    const socket = useWebSocket();
+    const { socket, isConnected } = useWebSocket();
     const [posts, setPosts] = useState<Post[]>([]);
     const [isMenuContent, setIsMenuContent] = useState<number | null>(null);
     const [reactions, setReactions] = useState<{ [key: string]: number }>({});
@@ -68,10 +72,35 @@ const MyPosts: React.FC<MyPostsProps> = ({idUser}) => {
     const [hasMore, setHasMore] = useState<boolean>(true);
     const [paginationInfo, setPaginationInfo] = useState<PaginationInfo | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
+    const [isShowModalEdit, setIsShowModalEdit] = useState(false);
+    const [selectEditPost, setSelectEditPost] = useState<Post | null>(null);
+    const [isDeletingPost, setIsDeletingPost] = useState(false);
      //Show modal comment
     const [isShowModalCmt, setIsShowModalCmt] = useState(false)
     const [selectPostId, setSelectPostId] = useState<number | null>(null);
     
+
+    //hàm giải mã lấy idUser
+    const getUserFromToken = () => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(
+                window
+                .atob(base64)
+                .split('')
+                .map(function (c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                })
+                .join('')
+            );
+            return JSON.parse(jsonPayload);
+    }
+        return null;
+    };
+
+    const user = getUserFromToken();
 
 
     const loadPosts = async () => {
@@ -109,9 +138,17 @@ const MyPosts: React.FC<MyPostsProps> = ({idUser}) => {
         postEventEmitter.on('postCreated', (newPost: Post) => {
             setPosts((prevPosts) => [newPost, ...prevPosts]);
         });
-        //huỷ sự kiện lắng nghe postCreated
+
+        //lắng nghe sự kiện updatePost
+        postEventEmitter.on('updatePost', (updatedPost: Post) => {
+            setPosts((prevPosts) => prevPosts.map(post => 
+                post.idPost === updatedPost.idPost ? updatedPost : post
+            ));
+        });
+    
         return () => {
             postEventEmitter.removeAllListeners('postCreated'); 
+            postEventEmitter.removeAllListeners('updatePost');
           };
     }, []);
 
@@ -121,7 +158,7 @@ const MyPosts: React.FC<MyPostsProps> = ({idUser}) => {
             const currentEmotion = reactions[idPost];
             // Nếu click vào cảm xúc hiện tại, xóa cảm xúc
             const newEmotion = String(currentEmotion) === emotion ? '' : emotion;
-            if(socket){
+            if(socket && isConnected){
                 socket.emit('addEmotion', {
                     idPost,
                     emotion: newEmotion
@@ -176,7 +213,7 @@ const MyPosts: React.FC<MyPostsProps> = ({idUser}) => {
 
     //hàm lắng nghe sự kiện cập nhật số lượng cảm xúc của post
     useEffect(() => {
-        if(socket){
+        if(socket && isConnected){
             socket.on('receiveNewEmotion', (data) => {
                 setPosts(prevPosts => prevPosts.map(post => 
                     post.idPost === data.idPost 
@@ -197,10 +234,44 @@ const MyPosts: React.FC<MyPostsProps> = ({idUser}) => {
         setIsMenuContent((prev) => prev === idPost ? null : idPost);
     };
     const handleClickOutside = (event: MouseEvent) => {
-        if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        // Thêm kiểm tra xem click có phải vào nút Edit không
+        const target = event.target as HTMLElement;
+        const isEditButton = target.closest('.menu-post-btn');
+        if (menuRef.current && !menuRef.current.contains(event.target as Node) && !isEditButton) {
             setIsMenuContent(null);
         }
     };
+
+    // Tách riêng hàm xử lý edit để dễ quản lý
+    const handleEditPost = (post: Post) => {
+        console.log('handleEditPost called with post:', post);
+        setSelectEditPost(post);
+        setIsShowModalEdit(true);
+        setIsMenuContent(null);
+    };
+
+    const handleDeletePost = async (post: Post) => {
+        const confirm = window.confirm('Are you sure you want to delete this post?');
+        if(confirm){
+            try {
+                setIsDeletingPost(true);
+                await deletePost(post.idPost);
+                toast.success('Delete post success');
+                //cập nhật lại state posts sau khi xóa post
+                setPosts(prevPosts => prevPosts.filter(p => p.idPost !== post.idPost));
+                //Emit sự kiện để cập nhật lại state posts trên server
+                postEventEmitter.emit('postDeleted', post.idPost);
+                setIsMenuContent(null); //ẩn menu sau khi xóa post
+            } catch (error) {
+                console.error('Error deleting post:', error);
+                toast.error('Delete post failed');
+            } finally {
+                setIsDeletingPost(false);
+            }
+        }
+    }
+
+
     useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
@@ -281,20 +352,42 @@ const MyPosts: React.FC<MyPostsProps> = ({idUser}) => {
                                                 <span>Hide this from your news feed.</span>
                                             </div>
                                         </button>
-                                        <button className="menu-post-btn">
-                                            <img src={IconReport} alt="" className="ic-18" />
-                                            <div className="options">
-                                                <div>Report</div>
-                                                <span>We won't let user know who reported this.</span>
-                                            </div>
-                                        </button>
-                                        <button className="menu-post-btn">
-                                            <img src={IconEdit} alt="" className="ic-18" />
-                                            <div className="options">
-                                                <div>Edit</div>
-                                                <span>Edit article as required.</span>
-                                            </div>
-                                        </button>
+                                        {user?.idUser !== post.authorId.idUser && (
+                                            <button className="menu-post-btn">
+                                                <img src={IconReport} alt="" className="ic-18" />
+                                                <div className="options">
+                                                    <div>Report</div>
+                                                    <span>We won't let user know who reported this.</span>
+                                                </div>
+                                            </button>
+                                        )}
+                                        {user?.idUser === post.authorId.idUser && (
+                                            <button className="menu-post-btn" onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleEditPost(post);
+                                            }}>
+                                                <img src={IconEdit} alt="" className="ic-18" />
+                                                <div className="options">
+                                                    <div>Edit</div>
+                                                    <span>Edit article as required.</span>
+                                                </div>
+                                            </button>
+                                        )}
+                                        {user?.idUser === post.authorId.idUser && (
+                                            <button className="menu-post-btn" onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDeletePost(post);
+                                            }}
+                                            disabled={isDeletingPost}
+                                            >
+                                                <img src={IconDelete} alt="" className="ic-18" />
+                                                <div className="options">
+                                                    <div>Delete</div>
+                                                    <span>Delete post as required.</span>
+                                                </div>
+                                            </button>
+                                        )}
+
                                     </div>
                                 </div>
                             </div>
@@ -390,6 +483,15 @@ const MyPosts: React.FC<MyPostsProps> = ({idUser}) => {
                     updateCommentCount = {updateCommentCount}
                 />
             )}
+            <ModalEditPost
+                show = {isShowModalEdit}
+                post = {selectEditPost || {} as Post}
+                handleClose = {() => {
+                    console.log('Closing modal');
+                    setIsShowModalEdit(false);
+                    setSelectEditPost(null);
+                }}
+            />
         </InfiniteScroll>
     </>);
 };
