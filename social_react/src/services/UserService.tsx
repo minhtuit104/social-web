@@ -69,4 +69,21 @@ const updateAvatar = async (imageUrl: string) => {
     }
 }
 
-export {loginApi, registerApi, fectchUserName, fetchAllUser, updateAvatar};
+const updateUserProfile = async (updateData: {name: string, email: string, birthday: string}) => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('Token is missing');
+        }
+        const response = await axios.put('/api/v1/users/update-profile', updateData, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        console.log('API response ===', response);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating user profile:', error);
+        throw error;
+    }
+}
+
+export {loginApi, registerApi, fectchUserName, fetchAllUser, updateAvatar, updateUserProfile};

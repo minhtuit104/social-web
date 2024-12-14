@@ -232,7 +232,7 @@ const ModalDetailPost: React.FC<ModalDetailPostProps> = ({
 
     return (
         <>
-        <Modal show={show} onHide={handleCloseAndUpdate} centered size="lg">
+        <Modal show={show} onHide={handleCloseAndUpdate} centered size="lg" dialogClassName="modal-detail-post">
             <Modal.Header closeButton>
             <Modal.Title style={{ display: 'flex', justifyContent: 'center', width: '100%'}}>Post of {user?.name}</Modal.Title>
             </Modal.Header>
@@ -312,7 +312,6 @@ const ModalDetailPost: React.FC<ModalDetailPostProps> = ({
                             scrollThreshold={0.8}
                             scrollableTarget ="scrollableDiv-detailPost"
                             loader={<p style={{textAlign: 'center'}}>Loading...</p>}
-                            endMessage={<p style={{textAlign: 'center'}}>No more comments</p>}
                         >
                             {comments.length > 0 ? (
                                 comments.map((comment: any) => (
@@ -360,7 +359,7 @@ const ModalDetailPost: React.FC<ModalDetailPostProps> = ({
                                     </div>                            
                                 ))
                             ) : (
-                                <p>No comment</p>
+                                <></>
                             )}
                         </InfiniteScroll>
                     </div>

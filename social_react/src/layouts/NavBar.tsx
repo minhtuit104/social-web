@@ -17,7 +17,7 @@ import { useWebSocket } from "../WebSocket/WebSocketProvider";
 import ModalDetailPost from "../components/modal_detail_post/Modal_detail_post";
 
 const NavBar = () => {
-    const { userAvatar } = useUser();
+    const { userAvatar, userNewName, userNewEmail } = useUser();
     const location = useLocation();
     const [activeTab, setActiveTab] = useState('');
     const [userName, setUserName] = useState<string | null>(null);
@@ -155,8 +155,8 @@ const NavBar = () => {
             <div className="profile-image">
                 <a href="/home/profile" onClick={handleProfile}><img src={userAvatar ?? avarta ?? 'https://www.gravatar.com/avatar/?d=mp' } alt="Profile Image" /></a>
             </div>
-            <h3>{userName ?? 'Loading...'}</h3>
-            <p>{emailInfo ?? 'Loading...'}</p>
+            <h3>{userNewName ?? userName ?? 'Loading...'}</h3>
+            <p>{userNewEmail ?? emailInfo ?? 'Loading...'}</p>
         </div>
         <nav>
             <ul>

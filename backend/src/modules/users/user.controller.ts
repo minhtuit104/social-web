@@ -49,11 +49,35 @@ export class UserController{
         return this.userService.create(createUserDto);
     }
 
-    // @Put('/:id')
-    // @UseGuards(JwtAuthGuard)
-    // update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto){
-    //     return this.userService.update(id, updateUserDto);
-    // }
+    //cập nhật thông tin cá nhân
+    @Put('/update-profile')
+    @UseGuards(JwtAuthGuard)
+    async updateProfile(@Body() updateUserDto: UpdateUserDto, @Req() req: Request, @Response() res) {
+        try {
+            const user = req['user'];
+            const idUser = user.idUser;
+            const updatedUser = await this.userService.update(idUser, updateUserDto);
+            
+            return res.status(200).json({
+                status: 'success',
+                message: 'update profile success',
+                data: updatedUser,
+            }); 
+        } catch (error) {
+            if (error instanceof HttpException) {
+                return res.status(error.getStatus()).json({
+                    status: 'error',
+                    message: error.message,
+                });
+            }
+
+            return res.status(500).json({
+                status: 'error',
+                message: 'Internal server error while updating profile',
+            });
+        }
+    }
+    
 
     @Put('/update-avatar')
     @UseGuards(JwtAuthGuard)

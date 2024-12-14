@@ -2,7 +2,7 @@ import IconGlobal from "../../assets/images/icons/ic_global.svg";
 import IconFriends from "../../assets/images/icons/ic_friends.svg";
 import IconThreedot from "../../assets/images/icons/ic_three-dot.svg";
 import IconBookmark from "../../assets/images/icons/ic_bookmark.svg";
-import IconHide from "../../assets/images/icons/ic_hide.svg";
+// import IconHide from "../../assets/images/icons/ic_hide.svg";
 import IconReport from "../../assets/images/icons/ic_report.svg";
 import IconEdit from "../../assets/images/icons/ic_edit.svg";
 import IconLike from "../../assets/images/icons/ic_like-fillsvg.svg";
@@ -26,6 +26,7 @@ import { useUser } from "../UserContext/UserContext";
 import InfiniteScroll from "react-infinite-scroll-component";
 import ModalEditPost from "../modal_edit_Post/modal_edit_post";
 import { toast } from "react-toastify";
+import { getAllSavedStatus, savePost } from "../../services/SavePostService";
 
 
 interface Author {
@@ -62,7 +63,7 @@ const privacyIcons: { [key: string]: string } = {
 
 const MyPosts: React.FC<MyPostsProps> = ({idUser}) => {
     const menuRef = useRef<HTMLDivElement | null>(null);
-    const { userAvatar } = useUser();
+    const { userAvatar, userNewName } = useUser();
     const { socket, isConnected } = useWebSocket();
     const [posts, setPosts] = useState<Post[]>([]);
     const [isMenuContent, setIsMenuContent] = useState<number | null>(null);
@@ -74,7 +75,7 @@ const MyPosts: React.FC<MyPostsProps> = ({idUser}) => {
     const [loading, setLoading] = useState<boolean>(false);
     const [isShowModalEdit, setIsShowModalEdit] = useState(false);
     const [selectEditPost, setSelectEditPost] = useState<Post | null>(null);
-    const [isDeletingPost, setIsDeletingPost] = useState(false);
+    const [savedPosts, setSavedPosts] = useState<{ [key: number]: boolean }>({});
      //Show modal comment
     const [isShowModalCmt, setIsShowModalCmt] = useState(false)
     const [selectPostId, setSelectPostId] = useState<number | null>(null);
@@ -112,12 +113,21 @@ const MyPosts: React.FC<MyPostsProps> = ({idUser}) => {
 
             if(response && response.data){
                 const { data: {data: newPosts, pagination} } = response;
-                console.log('danh sach post cua user:', newPosts);
+                // console.log('danh sach post cua user:', newPosts);
                 if(page === 1){
                     setPosts(newPosts);
                 }else{
                     setPosts(prevPosts => [...prevPosts, ...newPosts]);
                 }
+
+                // Kiểm tra trạng thái saved cho các posts mới
+                const postIds = newPosts.map((post: Post) => post.idPost);
+                const savedStatus = await getAllSavedStatus(postIds);
+                setSavedPosts(prev => ({
+                    ...prev,
+                    ...savedStatus
+                }));
+
                 setPaginationInfo(pagination);
                 setHasMore(page < pagination.last_page);
             }
@@ -242,6 +252,38 @@ const MyPosts: React.FC<MyPostsProps> = ({idUser}) => {
         }
     };
 
+    // Thêm useEffect để kiểm tra trạng thái saved của các bài post
+    useEffect(() => {
+        const checkSavedStatus = async () => {
+            if (!posts.length) return;
+            
+            try {
+                const postIds = posts.map(post => post.idPost);
+                const savedStatus = await getAllSavedStatus(postIds);
+                setSavedPosts(savedStatus);
+            } catch (error) {
+                console.error('Error checking saved status:', error);
+            }
+        };
+
+        checkSavedStatus();
+    }, [posts]); 
+
+    // Thêm hàm xử lý save post
+    const handleSavePost = async (post: Post) => {
+        try {
+            const result = await savePost(post.idPost);
+            setSavedPosts(prev => ({
+                ...prev,
+                [post.idPost]: result.saved
+            }));
+            toast.success(result.saved ? 'Post saved successfully' : 'Post unsaved successfully');
+        } catch (error) {
+            console.error('Error saving post:', error);
+            toast.error('Failed to save post');
+        }
+    };
+
     // Tách riêng hàm xử lý edit để dễ quản lý
     const handleEditPost = (post: Post) => {
         console.log('handleEditPost called with post:', post);
@@ -254,19 +296,15 @@ const MyPosts: React.FC<MyPostsProps> = ({idUser}) => {
         const confirm = window.confirm('Are you sure you want to delete this post?');
         if(confirm){
             try {
-                setIsDeletingPost(true);
-                await deletePost(post.idPost);
+                const res = await deletePost(post.idPost);
+                console.log('Post deleted: ', res);
                 toast.success('Delete post success');
                 //cập nhật lại state posts sau khi xóa post
                 setPosts(prevPosts => prevPosts.filter(p => p.idPost !== post.idPost));
-                //Emit sự kiện để cập nhật lại state posts trên server
-                postEventEmitter.emit('postDeleted', post.idPost);
                 setIsMenuContent(null); //ẩn menu sau khi xóa post
             } catch (error) {
                 console.error('Error deleting post:', error);
                 toast.error('Delete post failed');
-            } finally {
-                setIsDeletingPost(false);
             }
         }
     }
@@ -325,7 +363,7 @@ const MyPosts: React.FC<MyPostsProps> = ({idUser}) => {
                                 <div className="nav-post">
                                     <img src={ userAvatar ?? post.authorId?.avarta ?? 'https://www.gravatar.com/avatar/?d=mp' } alt="Profile Image" className="post-profile-image"/>
                                     <div className="post-info">
-                                        <h3>{post.authorId?.name}</h3>
+                                        <h3>{userNewName ?? post.authorId?.name}</h3>
                                         <span>
                                             {formatDistanceToNow(new Date(post.createAt), { addSuffix: true })}
                                             <img src={privacyIcons[post.privacy]} alt="Privacy" className="ic-18 time-privacy"/>
@@ -337,21 +375,25 @@ const MyPosts: React.FC<MyPostsProps> = ({idUser}) => {
                                     <button className="three-dot-btn" onClick={() => handleShowMenu(post.idPost)}>
                                         <img src={IconThreedot} alt="Menu" className="ic-22" />
                                     </button>
-                                    <div ref={menuRef} className={`menu-content ${isMenuContent === post.idPost ? 'showmenu' : ''}`}>
-                                        <button className="menu-post-btn">
-                                            <img src={IconBookmark} alt="" className="ic-18"/>
+                                    <div ref={menuRef} className={`menu-content-myPosts ${isMenuContent === post.idPost ? 'showmenu' : ''}`}>
+                                        <button className="menu-post-btn" onClick={() => handleSavePost(post)}>
+                                            <img src={IconBookmark} alt="" className={`ic-18 ${savedPosts[post.idPost] ? 'saved' : ''}`}/>
                                             <div className="options">
-                                                <div>Save</div>
-                                                <span>Add this to your saved items.</span>
+                                                <div>{savedPosts[post.idPost] ? 'Unsave' : 'Save'}</div>
+                                                <span>
+                                                    {savedPosts[post.idPost] 
+                                                        ? 'Remove this from your saved items.' 
+                                                        : 'Add this to your saved items.'}
+                                                </span>
                                             </div>
                                         </button>
-                                        <button className="menu-post-btn">
+                                        {/* <button className="menu-post-btn">
                                             <img src={IconHide} alt="" className="ic-18"/>
                                             <div className="options">
                                                 <div>Hide</div>
                                                 <span>Hide this from your news feed.</span>
                                             </div>
-                                        </button>
+                                        </button> */}
                                         {user?.idUser !== post.authorId.idUser && (
                                             <button className="menu-post-btn">
                                                 <img src={IconReport} alt="" className="ic-18" />
@@ -378,7 +420,6 @@ const MyPosts: React.FC<MyPostsProps> = ({idUser}) => {
                                                 e.stopPropagation();
                                                 handleDeletePost(post);
                                             }}
-                                            disabled={isDeletingPost}
                                             >
                                                 <img src={IconDelete} alt="" className="ic-18" />
                                                 <div className="options">

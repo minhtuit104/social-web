@@ -2,16 +2,26 @@ import "./profileHeader.css";
 import ImgCover from "../../assets/images/anh4.jpg";
 import ImgLocation from "../../assets/images/icons/ic_location.svg";
 import ImgFollow from "../../assets/images/icons/ic_friendss.svg";
+import ImgEmail from "../../assets/images/icons/ic_email.svg";
+import ImgBirthday from "../../assets/images/icons/ic_birthday1.svg";
 import IconCamera from "../../assets/images/icons/ic_camera.svg";
+import IconEdit from "../../assets/images/icons/ic_edit.svg";
+import IconSave from "../../assets/images/icons/ic_bookmark.svg";
 import { useEffect, useState } from "react";
-import { fectchUserName } from "../../services/UserService";
+import { fectchUserName, updateUserProfile } from "../../services/UserService";
 import ImgAddFriend from "../../assets/images/icons/ic_addfriend.svg";
 import { cancelFriendRequest, checkFriendshipStatus, deleteFriend, sendFriendRequest } from "../../services/FriendService";
 import ModalUpdateAvatar from "./modal_updateAvatar";
 import { useWebSocket } from "../../WebSocket/WebSocketProvider";
+import { toast } from "react-toastify";
+import { Button } from "react-bootstrap";
+import { Form, Modal } from "react-bootstrap";
+import { useUser } from "../UserContext/UserContext";
 
 interface ProfileHeaderProps {
     idUser: number | undefined;
+    onSavedPostsClick: () => void;
+    showingSavedPosts: boolean;
 }
 
 //hàm giải mã token lấy idUser
@@ -35,14 +45,27 @@ const getUserFromToken = () => {
 };
 
 
-const ProfileHeader: React.FC<ProfileHeaderProps> = ({idUser}) => {
+const ProfileHeader: React.FC<ProfileHeaderProps> = ({idUser, onSavedPostsClick, showingSavedPosts}) => {
     const { socket, isConnected } = useWebSocket();
+    const { updateUserInfo } = useUser();
+    
     const [avarta, setAvarta] = useState<string | null>(null);
     const [name, setName] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [friendshipStatus, setFriendshipStatus] = useState<string>('not_friend');
     const [currentUserId, setCurrentUserId] = useState<number | null>(null);
     const [showModalUpdateAvatar, setShowModalUpdateAvatar] = useState(false);
+    const [userBirthday, setUserBirthday] = useState<string | null>(null);
+    const [userEmail, setUserEmail] = useState<string | null>(null);
+    const [showModalUpdateProfile, setShowModalUpdateProfile] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [editForm, setEditForm] = useState({
+        name: '',
+        email: '',
+        birthday: ''
+    });
+
+
 
     const userInfo = getUserFromToken();
     const currentId = userInfo?.idUser;
@@ -62,6 +85,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({idUser}) => {
                         setAvarta(userData.avarta);
                         setName(userData.name);
                         setFriendshipStatus(status);
+                        setUserBirthday(userData.birthday)
+                        setUserEmail(userData.email)
                         // console.log('userData===', userData);
                     }
                 } catch (error) {
@@ -73,7 +98,48 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({idUser}) => {
 
         };
         getUser();
-    },[idUser])
+    },[idUser]);
+
+    //hàm lấy thông tin user để hiển thị trong form edit thong tin user
+    useEffect(() => {
+        setEditForm({
+            name: name || '',
+            email: userEmail || '',
+            birthday: userBirthday || ''
+        });
+    }, [name, userEmail, userBirthday]);
+
+    const handleEditClick = () => {
+        setShowModalUpdateProfile(true);
+    };
+
+    const handleCloseEditProfile = () => {
+        setShowModalUpdateProfile(false);
+    };
+
+    const handleSaveEditProfile = async () => {
+        try {
+            setIsSubmitting(true);
+            console.log('editForm===', editForm);
+            const response = await updateUserProfile(editForm);
+            console.log('response from API ===', response);
+            if(response){
+                setName(editForm.name);
+                setUserEmail(editForm.email);
+                setUserBirthday(editForm.birthday);
+                updateUserInfo(editForm.name, editForm.email); //cập nhật thông tin user trong context
+                setShowModalUpdateProfile(false);
+                toast.success('Update profile success');
+            }else{
+                toast.error('Update profile failed: '+response.message);
+            }
+        } catch (error) {
+            console.error('Failed to update profile:', error);
+            toast.error('Error update profile');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     //hàm gửi lời mời kết bạn
     const handleAddFriend = async () => {
@@ -121,11 +187,68 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({idUser}) => {
         }
     }
 
-    //hàm hiển thị nút kết bạn
+    //hàm hiển thị trạng thái
     const renderFriendButton = () => {
         //kiểm tra nếu đang xem profile của chính mình thì không hiển thị nút kết bạn
         if(currentUserId === idUser){
-            return null;
+            return (<>
+                <div className="profileHeader-Edit">
+                    <button className="profileHeader-editBtn" onClick={handleEditClick}>
+                        <img src={IconEdit} alt="Edit" className="ic-22" />
+                    </button>
+                    {/* modal edit */}
+                    <Modal show={showModalUpdateProfile} onHide={handleCloseEditProfile} dialogClassName="modal-edit-profile">
+                        <Modal.Header closeButton>
+                            <Modal.Title style={{ display: 'flex', justifyContent: 'center', width: '100%'}}>Edit Profile</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <Form>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Name</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Enter your name"
+                                        value={editForm.name}
+                                        onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                                    />
+                                </Form.Group>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Email</Form.Label>
+                                    <Form.Control
+                                        type="email"
+                                        placeholder="Enter your email"
+                                        value={editForm.email}
+                                        onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                                    />
+                                </Form.Group>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Birthday</Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        value={editForm.birthday}
+                                        onChange={(e) => setEditForm({...editForm, birthday: e.target.value})}
+                                    />
+                                </Form.Group>
+                            </Form>
+                        </Modal.Body>
+                        <Modal.Footer style={{flexDirection: 'row-reverse'}}>
+                            <Button className="btn-submit" onClick={handleSaveEditProfile} disabled={isSubmitting}>
+                                {isSubmitting ? 'Saving...' : 'Save changes'}
+                            </Button>
+                            <Button variant="secondary" onClick={handleCloseEditProfile} disabled={isSubmitting}>
+                                Cancel
+                            </Button>
+                        </Modal.Footer>
+                    </Modal>
+
+                    <button 
+                        className={`profileHeader-editBtn ${showingSavedPosts ? 'saved-posts-active' : ''}`} 
+                        onClick={onSavedPostsClick}
+                    >
+                        <img src={IconSave} alt="Save" className="ic-22" />
+                    </button>
+                </div>
+            </>);
         }
         switch(friendshipStatus) {
             case 'accepted':
@@ -194,9 +317,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({idUser}) => {
             <div className="profileHeader-Info">
                 <div className="profileHeader-Info-Top">
                     <h4 className="profileHeader-Name">{name}</h4>
-                    <span className="profileHeader-Desc">Hello everyone</span>
+                    <span className="profileHeader-Desc"><img src={ImgBirthday} alt="Follow" className="ic-18" />{userBirthday}</span>
                     <span className="profileHeader-Location"><img src={ImgLocation} alt="Location" className="ic-18" />Hà Nội, Việt Nam</span>
-                    <div className="profileHeader-Follow"><img src={ImgFollow} alt="Follow" className="ic-18" />3,2tr follower</div>
+                    <div className="profileHeader-Follow"><img src={ImgEmail} alt="Follow" className="ic-18" />{userEmail}</div>
                 </div>
                 <div className="profileHeader-Info-Bottom">
                     {renderFriendButton()}

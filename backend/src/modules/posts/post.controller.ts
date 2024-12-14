@@ -37,8 +37,13 @@ export class PostController{
 
     @Delete('/:id')
     @UseGuards(JwtAuthGuard)
-    remove(@Param('id') id: number){
-        return this.postService.remove(id);
+    async remove(@Param('id') id: number, @Response() res){
+        const post = await this.postService.remove(id);
+        return res.status(200).json({
+            status: 'success',
+            message: 'delete post successfully',
+            data: post,
+          });
     }
 
     @Post()

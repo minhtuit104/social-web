@@ -83,14 +83,19 @@
     margin-left: 4px;
 }
 
-.modal-content{
-    border-radius: 10px !important;
-    height: auto !important;
+.custom-modal .modal-content{
+    border-radius: 10px;
+    height: auto;
 }
 
 .custom-modal{
     max-width: 650px !important;
     width: 100% !important;
+
+    .modal-title.h4 {
+        font-size: 20px;
+        font-weight: 600;
+    }
 }
 
 .modal-post-header{

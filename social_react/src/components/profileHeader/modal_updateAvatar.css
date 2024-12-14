@@ -11,8 +11,9 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        width: 100%;
     }
-    
+
     .modal-avatar{
         display: flex;
         flex-direction: column;
@@ -123,6 +124,6 @@
 
 .modal-update-avatar .modal-content{
     width: 630px !important;
-    height: 550px !important;
+    height: auto !important;
 }
 

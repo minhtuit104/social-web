@@ -45,7 +45,6 @@ const StoryView: React.FC<StoryViewProps> = ({stories, onClose, onNextUser, onPr
         }
         //đảm bảo story tồn tại trước khi bát đầu progress
         if(!stories[currentStoryIndex]){
-            toast.error("story does not exist");
             return;
         }
         const startTime = Date.now();
@@ -156,7 +155,6 @@ const StoryView: React.FC<StoryViewProps> = ({stories, onClose, onNextUser, onPr
                         <video 
                             src={currentStory.image} 
                             autoPlay 
-                            muted 
                             playsInline
                             onEnded={handleNextStory}
                         />

@@ -25,6 +25,8 @@ import { Friend } from './typeorm/entities/Friend';
 import { FriendModule } from './modules/friends/friend.module';
 import { Story } from './typeorm/entities/Story';
 import { StoryModule } from './modules/story/story.module';
+import { SavedPost } from './typeorm/entities/SavePost';
+import { SavedPostModule } from './modules/savePost/savePost.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -35,7 +37,7 @@ import { StoryModule } from './modules/story/story.module';
       host: "localhost",
       type: "mysql",
       autoLoadEntities: true,
-      entities: [User,Account, Post, Comment, SubComment, Messager, Notification, Emotion, Friend, Story],
+      entities: [User,Account, Post, Comment, SubComment, Messager, Notification, Emotion, Friend, Story, SavedPost],
       synchronize: true,
     }),
     AuthModule,
@@ -49,7 +51,8 @@ import { StoryModule } from './modules/story/story.module';
     NotificationModule,
     EmotionModule,
     FriendModule,
-    StoryModule
+    StoryModule,
+    SavedPostModule
   ],
   controllers: [AppController],
   providers: [AppService],

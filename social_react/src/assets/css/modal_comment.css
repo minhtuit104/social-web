@@ -1,5 +1,12 @@
 @import url(./styles.css);
 
+.modal-comment{
+    .modal-title.h4 {
+        font-size: 20px;
+        font-weight: 600;
+    }
+}
+
 .list-comment{
     height: 483px;
     overflow-y: auto;
@@ -36,11 +43,19 @@
     margin-right: 10px;
     object-fit: cover;
 }
-.modal-body .comment-info h3{
-    font-size: 16px;
-    font-weight: 700;
+
+.modal-body .comment-info{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
 }
-.modal-body .comment-info span{
+.modal-body .comment-info .nameinfo{
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #000;
+}
+.modal-body .comment-info .time-cmt{
     font-size: 14px;
     font-weight: 500;
     line-height: 19.5px;
@@ -72,11 +87,12 @@
 }
 .modal-body .comment-child .comment-child-header{
     display: flex;
-    margin-top: 20px;
+    /* margin-top: 20px; */
 }
 .modal-body .comment-child .comment-child-header img{
     width: 40px;
     height: 40px;
+    object-fit: cover;
     border-radius: 50%;
     margin-right: 8px;
 }

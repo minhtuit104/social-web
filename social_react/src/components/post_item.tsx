@@ -2,7 +2,7 @@ import IconGlobal from "../assets/images/icons/ic_global.svg";
 import IconFriends from "../assets/images/icons/ic_friends.svg";
 import IconThreedot from "../assets/images/icons/ic_three-dot.svg";
 import IconBookmark from "../assets/images/icons/ic_bookmark.svg";
-import IconHide from "../assets/images/icons/ic_hide.svg";
+// import IconHide from "../assets/images/icons/ic_hide.svg";
 import IconReport from "../assets/images/icons/ic_report.svg";
 import IconEdit from "../assets/images/icons/ic_edit.svg";
 import IconDelete from "../assets/images/icons/ic_delete.svg";
@@ -29,6 +29,7 @@ import { useEmotion } from "./UserContext/EmotionByUserContext";
 import InfiniteScroll from "react-infinite-scroll-component";
 import ModalEditPost from "./modal_edit_Post/modal_edit_post";
 import { toast } from "react-toastify";
+import { getAllSavedStatus, savePost } from "../services/SavePostService";
 //định nghĩa interface
 interface Author {
     idUser: number;
@@ -73,7 +74,8 @@ const Post_item = () =>{
     const [selectPostId, setSelectPostId] = useState<number | null>(null);
     const [isShowModalEdit, setIsShowModalEdit] = useState(false);
     const [selectEditPost, setSelectEditPost] = useState<Post | null>(null);
-    const [isDeletingPost, setIsDeletingPost] = useState(false);
+    //const [isDeletingPost, setIsDeletingPost] = useState(false);
+    const [savedPosts, setSavedPosts] = useState<{[key: number]: boolean}>({});
     //hook
     const menuRef = useRef<HTMLDivElement | null>(null);
     const navigate = useNavigate();
@@ -102,7 +104,6 @@ const Post_item = () =>{
 
     const user = getUserFromToken();
 
-    
     //hàm chuyển hướng tới trang profile của người dùng
     const handleNavigateToProfile = (idUser: number) => {
         navigate(`/profile/${idUser}`);
@@ -125,10 +126,17 @@ const Post_item = () =>{
                 } else {
                     setPosts(prevPosts => [...prevPosts, ...newPosts]);
                 }
-                setPaginationInfo(pagination);
-                setHasMore(page < pagination.last_page);
 
-                
+                // Kiểm tra trạng thái saved cho các posts mới
+                const postIds = newPosts.map((post: Post) => post.idPost);
+                const savedStatus = await getAllSavedStatus(postIds);
+                setSavedPosts(prev => ({
+                    ...prev,
+                    ...savedStatus
+                }));
+
+                setPaginationInfo(pagination);
+                setHasMore(page < pagination.last_page);         
             }
         } catch (error) {
             console.error('Error loading posts:', error);
@@ -275,6 +283,38 @@ const Post_item = () =>{
         }
     };
 
+    // Thêm useEffect để kiểm tra trạng thái saved của các bài post
+    useEffect(() => {
+        const checkSavedStatus = async () => {
+            if (!posts.length) return;
+            
+            try {
+                const postIds = posts.map(post => post.idPost);
+                const savedStatus = await getAllSavedStatus(postIds);
+                setSavedPosts(savedStatus);
+            } catch (error) {
+                console.error('Error checking saved status:', error);
+            }
+        };
+
+        checkSavedStatus();
+    }, [posts]); 
+
+    // Thêm hàm xử lý save post
+    const handleSavePost = async (post: Post) => {
+        try {
+            const result = await savePost(post.idPost);
+            setSavedPosts(prev => ({
+                ...prev,
+                [post.idPost]: result.saved
+            }));
+            toast.success(result.saved ? 'Post saved successfully' : 'Post unsaved successfully');
+        } catch (error) {
+            console.error('Error saving post:', error);
+            toast.error('Failed to save post');
+        }
+    };
+
     // Tách riêng hàm xử lý edit để dễ quản lý
     const handleEditPost = (post: Post) => {
         console.log('handleEditPost called with post:', post);
@@ -287,19 +327,15 @@ const Post_item = () =>{
         const confirm = window.confirm('Are you sure you want to delete this post?');
         if(confirm){
             try {
-                setIsDeletingPost(true);
-                await deletePost(post.idPost);
+                const res = await deletePost(post.idPost);
+                console.log('Post deleted: ', res);
                 toast.success('Delete post success');
                 //cập nhật lại state posts sau khi xóa post
                 setPosts(prevPosts => prevPosts.filter(p => p.idPost !== post.idPost));
-                //Emit sự kiện để cập nhật lại state posts trên server
-                postEventEmitter.emit('postDeleted', post.idPost);
                 setIsMenuContent(null); //ẩn menu sau khi xóa post
             } catch (error) {
                 console.error('Error deleting post:', error);
                 toast.error('Delete post failed');
-            } finally {
-                setIsDeletingPost(false);
             }
         }
     }
@@ -377,20 +413,24 @@ const Post_item = () =>{
                                         <img src={IconThreedot} alt="Menu" className="ic-22" />
                                     </button>
                                     <div ref={menuRef} className={`menu-content ${isMenuContent === post.idPost ? 'showmenu' : ''}`}>
-                                        <button className="menu-post-btn">
-                                            <img src={IconBookmark} alt="" className="ic-18"/>
+                                        <button className="menu-post-btn" onClick={() => handleSavePost(post)}>
+                                            <img src={IconBookmark} alt="" className={`ic-18 ${savedPosts[post.idPost] ? 'saved' : ''}`}/>
                                             <div className="options">
-                                                <div>Save</div>
-                                                <span>Add this to your saved items.</span>
+                                                <div>{savedPosts[post.idPost] ? 'Unsave' : 'Save'}</div>
+                                                <span>
+                                                    {savedPosts[post.idPost] 
+                                                        ? 'Remove this from your saved items.' 
+                                                        : 'Add this to your saved items.'}
+                                                </span>
                                             </div>
                                         </button>
-                                        <button className="menu-post-btn">
+                                        {/* <button className="menu-post-btn">
                                             <img src={IconHide} alt="" className="ic-18"/>
                                             <div className="options">
                                                 <div>Hide</div>
                                                 <span>Hide this from your news feed.</span>
                                             </div>
-                                        </button>
+                                        </button> */}
                                         {user?.idUser !== post.authorId.idUser && (
                                             <button className="menu-post-btn">
                                                 <img src={IconReport} alt="" className="ic-18" />
@@ -417,7 +457,7 @@ const Post_item = () =>{
                                                 e.stopPropagation();
                                                 handleDeletePost(post);
                                             }} 
-                                            disabled={isDeletingPost}
+                                    
                                             >
                                                 <img src={IconDelete} alt="" className="ic-18" />
                                                 <div className="options">
@@ -527,7 +567,6 @@ const Post_item = () =>{
                 show = {isShowModalEdit}
                 post = {selectEditPost || {} as Post}
                 handleClose = {() => {
-                    console.log('Closing modal');
                     setIsShowModalEdit(false);
                     setSelectEditPost(null);
                 }}

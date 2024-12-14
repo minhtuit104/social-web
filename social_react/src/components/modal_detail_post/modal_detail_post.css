@@ -1,8 +1,15 @@
 @import url(../../assets/css/styles.css);
 
-.modal-content{
-    width: 675px;
+.modal-detail-post .modal-content{
+    border-radius: 10px;
     height: 685px;
+}
+
+.modal-detail-post{
+    .modal-title.h4 {
+        font-size: 20px;
+        font-weight: 600;
+    }
 }
 
 .post-detail-section {
@@ -184,13 +191,13 @@
 }
 .modal-body .comment-child .comment-child-header{
     display: flex;
-    margin-top: 20px;
 }
 .modal-body .comment-child .comment-child-header img{
     width: 40px;
     height: 40px;
     border-radius: 50%;
     margin-right: 8px;
+    object-fit: cover;
 }
 .modal-body .comment-child .comment-content{
     margin: 8px 0 8px 48px;

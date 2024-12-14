@@ -25,11 +25,16 @@ export const ChatProvider = ({ children, socket }: { children: React.ReactNode, 
 
     // Xử lý tin nhắn mới
     useEffect(() => {
-        if (!socket?.connected) return;
+        if (!socket?.connected) {
+            return;
+        }
 
         const handleNewMessage = (message: any) => {
             console.log("Received new message:", message);
             const senderId = message.sender.idUser;
+
+            //luon thêm tin nhắn vào state, bất kể chat đã được mở hay chưa
+            addMessage(senderId, message);
             
             // Tự động mở chat khi nhận tin nhắn mới
             setOpenChats(prev => {
@@ -43,8 +48,6 @@ export const ChatProvider = ({ children, socket }: { children: React.ReactNode, 
                 }];
             });
 
-            // Thêm tin nhắn vào state
-            addMessage(senderId, message);
         };
 
         socket.on('receiveMessage', handleNewMessage);

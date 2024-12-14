@@ -218,7 +218,7 @@ const ModalComment: React.FC<ModalCommentProps> = ({show, idPost, handleClose, u
 
     return (
         <>
-        <Modal show={show} onHide={handleCloseAndUpdate} centered size="lg">
+        <Modal show={show} onHide={handleCloseAndUpdate} centered size="lg" dialogClassName="modal-comment">
             <Modal.Header closeButton>
             <Modal.Title style={{ display: 'flex', justifyContent: 'center', width: '100%'}}>Comments</Modal.Title>
             </Modal.Header>
@@ -240,22 +240,22 @@ const ModalComment: React.FC<ModalCommentProps> = ({show, idPost, handleClose, u
                                 {comments.map((comment: any) => (
                                     <div key={`comment-${comment.idComment}`}>                   
                                         <CommentParent
-                                        author={comment.user.name}
-                                        comment={comment.comment}
-                                        createdAt={comment.createdAt}
-                                        avarta={comment.user.avarta ?? 'https://www.gravatar.com/avatar/?d=mp'}
-                                        idComment={comment.idComment}
-                                        onReplyClick={handleShowIdComment}
+                                            author={comment.user.name}
+                                            comment={comment.comment}
+                                            createdAt={comment.createdAt}
+                                            avarta={comment.user?.avarta ?? 'https://www.gravatar.com/avatar/?d=mp'}
+                                            idComment={comment.idComment}
+                                            onReplyClick={handleShowIdComment}
                                         />
                                         {/* Hiển thị form nhập sub-comment*/}
                                         {commentId === comment.idComment && (                                  
                                             <div className="subcomment-input">
-                                                <img src={comment.user.avarta ?? 'https://www.gravatar.com/avatar/?d=mp'} alt="Tu" className="avatar-comment"/>
+                                                <img src={user?.avarta ?? 'https://www.gravatar.com/avatar/?d=mp'} alt="Tu" className="avatar-comment"/>
                                                 <input 
-                                                type="text"
-                                                placeholder="Reply comment..." 
-                                                value={newSubComment}
-                                                onChange={(event) => setNewSubComment(event.target.value)}
+                                                    type="text"
+                                                    placeholder="Reply comment..." 
+                                                    value={newSubComment}
+                                                    onChange={(event) => setNewSubComment(event.target.value)}
                                                 />
 
                                                 <button className="send-btn" onClick={() => handleAddSubcomment(comment.idComment)}>
@@ -290,11 +290,11 @@ const ModalComment: React.FC<ModalCommentProps> = ({show, idPost, handleClose, u
                     <img src={user?.avarta ?? 'https://www.gravatar.com/avatar/?d=mp'} alt="Tu" className="avatar-comment"/>
                     <div className="modal-footer-input">
                         <input 
-                        type="text" 
-                        className="input" 
-                        placeholder="You can create comment...."
-                        value={newComment}
-                        onChange={(event) => setNewComment(event.target.value)}
+                            type="text" 
+                            className="input" 
+                            placeholder="You can create comment...."
+                            value={newComment}
+                            onChange={(event) => setNewComment(event.target.value)}
                         />
                         <button className="send-btn" onClick={handleAddComment}>
                           <img src={IconSend} className="ic-22" alt="Send"/>

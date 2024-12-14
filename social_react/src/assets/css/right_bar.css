@@ -100,7 +100,7 @@
     border: 2px solid var(--grey5);
     box-shadow: 3px 0 5px rgba(0, 0, 0, 0.1);
 }
-.stories-body .story-item img{
+.stories-body .story-item .story-media{
     width: 100px;
     height: 150px;
     object-fit: cover;
@@ -123,6 +123,7 @@
     width: 22px;
     height: 22px;
     border-radius: 50%;
+    object-fit: cover;
 }
 .stories-body .story-item .story-info span{
     font-size: 8px;
