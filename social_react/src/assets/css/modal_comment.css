@@ -1,5 +1,32 @@
 @import url(./styles.css);
 
+.modal-comment{
+    .modal-title.h4 {
+        font-size: 20px;
+        font-weight: 600;
+    }
+}
+
+.list-comment{
+    height: 483px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Thêm style cho scrollbar nếu cần */
+.list-comment::-webkit-scrollbar {
+    width: 6px;
+}
+
+.list-comment::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.list-comment::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
 .modal-body .comment-parent{
     margin-bottom: 10px;
     background-color: rgba(206, 206, 206, 0.5);
@@ -16,11 +43,19 @@
     margin-right: 10px;
     object-fit: cover;
 }
-.modal-body .comment-info h3{
-    font-size: 16px;
-    font-weight: 700;
+
+.modal-body .comment-info{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
 }
-.modal-body .comment-info span{
+.modal-body .comment-info .nameinfo{
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #000;
+}
+.modal-body .comment-info .time-cmt{
     font-size: 14px;
     font-weight: 500;
     line-height: 19.5px;
@@ -52,11 +87,12 @@
 }
 .modal-body .comment-child .comment-child-header{
     display: flex;
-    margin-top: 20px;
+    /* margin-top: 20px; */
 }
 .modal-body .comment-child .comment-child-header img{
     width: 40px;
     height: 40px;
+    object-fit: cover;
     border-radius: 50%;
     margin-right: 8px;
 }
@@ -105,34 +141,46 @@
 
 .subcomment-input{
     position: relative;
+    display: flex;
+    align-items: center;
     margin-bottom: 10px;
-    margin-left: 100px;
+    margin-left: 66px;
+}
+.subcomment-input img.avatar-comment{
+    width: 40px; /* Kích thước avatar nhỏ hơn comment chính */
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 .subcomment-input input{
-    padding: 10px;
-    border-radius: 8px;
-    width: 590px;
+    flex: 1;
+    padding: 10px 40px 10px 15px;
+    border-radius: 14px;
     border: none;
     outline: none;
     background: var(--white4);
+    font-size: 14px;
 }
 .subcomment-input .send-btn{
     position: absolute;
-    right: 0;
-    top: 14%;
-    margin-right: 5px;
+    right: 8px;
+    top: 4px;
     border: none;
     background: none;
     cursor: pointer;
-    padding: 4px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .comment-child{
+    padding: 10px;
     background-color: rgba(206, 206, 206, 0.5);
-    margin-bottom: 10px;
+    margin: 10px 0;
     border-radius: 12px;
+    margin-left: 66px;
 }
 .subcomments{
-    display: flex;
-    flex-direction: column;
+    margin-top: 10px;
 }

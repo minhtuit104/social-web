@@ -5,6 +5,7 @@
     background-color: rgba(104, 208, 202, 0.2);
     padding: 20px 20px 10px 20px;
     border-radius: 14px;
+    border: 1px solid #e9e5e5;
 }
 .post-input-top{
     display: flex;
@@ -82,13 +83,19 @@
     margin-left: 4px;
 }
 
-.modal-content{
-    border-radius: 10px !important;
+.custom-modal .modal-content{
+    border-radius: 10px;
+    height: auto;
 }
 
 .custom-modal{
     max-width: 650px !important;
     width: 100% !important;
+
+    .modal-title.h4 {
+        font-size: 20px;
+        font-weight: 600;
+    }
 }
 
 .modal-post-header{

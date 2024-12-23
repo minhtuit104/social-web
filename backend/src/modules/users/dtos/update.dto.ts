@@ -4,18 +4,15 @@ import { IsEmail, IsNotEmpty } from "class-validator";
 export class UpdateUserDto {
     // @IsNotEmpty({message: 'idUser không được để trống'})
     // idUser: number;
-    @ApiProperty()
-    @IsNotEmpty({message: 'tên không được để trống'})
-    name: string;
+    @ApiProperty({required: false})
+    name?: string;
 
-    @ApiProperty()
-    @IsNotEmpty({message: 'email không được để trống'})
-    @IsEmail({}, {message: 'email không đúng định dạng'})
-    email: string;
+    @ApiProperty({required: false})
+    email?: string;
 
-    @ApiProperty()
-    birthday: string;
+    @ApiProperty({required: false})
+    birthday?: string;
 
-    @ApiProperty()
-    avarta: string;
+    @ApiProperty({required: false})
+    avarta?: string;
 }

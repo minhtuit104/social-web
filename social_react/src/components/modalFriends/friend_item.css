@@ -1,0 +1,43 @@
+@import url(../../assets/css/styles.css);
+
+.friend-item {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #eee;
+}
+
+.friend-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.friend-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.friend-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.friend-name {
+    font-weight: 550;
+    color: var(--black1);
+    text-decoration: none;
+}
+
+.friend-name:hover {
+    text-decoration: underline;
+    color: var(--black1);
+}
+
+.friend-username {
+    font-size: 0.9em;
+    color: var(--grey1);
+}

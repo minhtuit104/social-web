@@ -7,6 +7,7 @@ import { PostDTO } from "./dtos/postDTO";
 import { plainToInstance } from "class-transformer";
 import { UpdatePostDto } from "./dtos/update.dto";
 import { User } from "src/typeorm/entities/User";
+import { PaginatedResponse } from "../pagination/pagination.interface";
 
 @Injectable()
 
@@ -16,10 +17,23 @@ export class PostService{
         @InjectRepository(Post) private postRepository: Repository<Post>,
         @InjectRepository(User) private userRepository: Repository<User>) {}
 
-    async findAll(){
-        return await this.postRepository.find({
+    async findAll(page: number = 1, pageSize: number = 5): Promise<PaginatedResponse<Post>>{
+        const [posts, total] = await this.postRepository.findAndCount({
             relations: ['authorId'],
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+            order: {idPost: 'DESC'}
         });
+
+        return {
+            data: posts,
+            pagination: {
+                total,
+                last_page: Math.ceil(total / pageSize),
+                pageSize,
+                page
+            }
+        }
     }
 
     async findOne(id: number){
@@ -45,15 +59,18 @@ export class PostService{
     }
 
     async create(createPostDto: CreatePostDto, authorId: number){
-        
+
+        const author = await this.userRepository.findOne({where: {idUser: authorId}});
+        if (!author) {
+            throw new NotFoundException('Author not found');
+        }
+
         const newInstance = this.postRepository.create({
             ...createPostDto,
             authorId: {idUser: authorId}
         });
 
         const savePost = await this.postRepository.save(newInstance);
-
-        const author = await this.userRepository.findOne({where: {idUser: authorId}});
 
         return {
             ...savePost,
@@ -70,6 +87,26 @@ export class PostService{
             this.postRepository.merge(findPost, updatePostDto);
 
             return this.postRepository.save(findPost);
+        }
+    }
+
+    async fetchPostByIdUser(idUser: number, page: number = 1, pageSize: number = 10): Promise<PaginatedResponse<Post>>{
+        const [posts, total] = await this.postRepository.findAndCount({
+            where: {authorId: {idUser: idUser}},
+            relations: ['authorId'],
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+            order: {idPost: 'DESC'}
+        });
+
+        return {
+            data: posts,
+            pagination: {
+                total,
+                last_page: Math.ceil(total / pageSize),
+                pageSize,
+                page
+            }
         }
     }
 }

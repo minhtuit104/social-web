@@ -1,0 +1,16 @@
+@import url(../../assets/css/styles.css);
+
+.savePostlist {
+    margin-top: 150px;
+}
+
+.savePostlist-title {
+    padding-top: 10px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.savePostlist-title span {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--black1);
+}

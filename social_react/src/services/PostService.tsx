@@ -1,19 +1,19 @@
 import axios from "./axios";
 
-const fetchPosts = async () =>{
+const fetchPosts = async (page: number = 1, pageSize: number = 5) =>{
     const token = localStorage.getItem('token');
     if (!token) {
-        console.error('Token is missing');
-        return;
+        throw new Error('Token is missing');
     }
     
     try {
         // Gọi API với token trong header Authorization
-        return await axios.get('/api/v1/posts', {
+        const response = await axios.get(`/api/v1/posts?page=${page}&pageSize=${pageSize}`, {
             headers: {
                 Authorization: `Bearer ${token}` 
             }
         });
+        return response;
     } catch (error) {
         console.error('Error fetching posts:', error);
         throw error; // Ném lỗi để xử lý sau này
@@ -23,8 +23,7 @@ const fetchPosts = async () =>{
 const createPost = async (postData: any) => {
     const token = localStorage.getItem('token');
     if (!token) {
-        console.error('Token is missing');
-        return;
+        throw new Error('Token is missing');
     }
 
     try {
@@ -34,7 +33,6 @@ const createPost = async (postData: any) => {
                 Authorization: `Bearer ${token}` 
             }
         });
-
         return response;
 
     } catch (error) {
@@ -43,4 +41,63 @@ const createPost = async (postData: any) => {
     }
 };
 
-export {fetchPosts, createPost};
+const fetchPostByIdUser = async (idUser: number, page: number = 1, pageSize: number = 10) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.error('Token is missing');
+        return;
+    }
+
+    try {
+        const response = await axios.get(`/api/v1/posts/user/${idUser}?page=${page}&pageSize=${pageSize}`, {
+            headers: {
+                Authorization: `Bearer ${token}` 
+            }
+        });
+        return response;
+    } catch (error) {
+        console.error('Error fetching posts:', error);
+        throw error;
+    }
+}
+
+const updatePost = async (idPost: number, postData: any) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        throw new Error('Token is missing');
+    }
+    
+    try {
+        const response = await axios.put(`/api/v1/posts/${idPost}`, postData, {
+            headers: {
+                Authorization: `Bearer ${token}` 
+            }
+        });
+        return response;
+    } catch (error) {
+        console.error('Error updating post:', error);
+        throw error;
+    }
+}
+
+const deletePost = async (idPost: number) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        throw new Error('Token is missing');
+    }
+
+    try {
+        const response = await axios.delete(`/api/v1/posts/${idPost}`, {
+            headers: {
+                Authorization: `Bearer ${token}` 
+            }
+        });
+        console.log('Response from deletePost:', response);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting post:', error);
+        throw error;
+    }
+}
+
+export {fetchPosts, createPost, fetchPostByIdUser, updatePost, deletePost};

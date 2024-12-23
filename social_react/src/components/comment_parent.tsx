@@ -20,15 +20,15 @@ const CommentParent = ({idComment,author, comment, createdAt, avarta, onReplyCli
             <div className="comment-parent-header">
                 <img src={avarta} alt={author}/>
                 <div className="comment-info">
-                    <h3>{author}</h3>
-                    <span>{formatDistanceToNow(new Date(createdAt), { addSuffix: true })}</span>
+                    <span className="nameinfo">{author}</span>
+                    <span className="time-cmt">{formatDistanceToNow(new Date(createdAt), { addSuffix: true })}</span>
                 </div>
             </div>
             <div className="comment-content">
                 <p>{comment}</p>
             </div>
             <div className="comment-footer">
-                <button>Like</button>
+                {/* <button>Like</button> */}
                 <button onClick={() => onReplyClick(idComment)}>Reply</button>
             </div>                
         </div>

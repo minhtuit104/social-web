@@ -1,0 +1,17 @@
+@import url(../../assets/css/styles.css);
+
+.chat-windows {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 20px;
+    padding-right: 30px; /* Để tránh overlap với sidebar */
+    z-index: 1000;
+}
+
+.chat-notification {
+    position: relative !important;
+    transition: all 0.3s ease;
+}

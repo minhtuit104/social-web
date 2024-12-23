@@ -72,9 +72,9 @@ const ModalInputPost: React.FC<any> = (props) => {
     
     //hàm xử lý khi chọn ảnh
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files;
-      if (file) {
-        setImage(Array.from(file));
+      const files = event.target.files;
+      if (files) {
+        setImage(prevImages => [...prevImages, ...Array.from(files)]);
       }
     };
 
@@ -105,16 +105,19 @@ const ModalInputPost: React.FC<any> = (props) => {
           image: imageUrls.join(','),
           privacy,
         };
+
+        console.log("...check postData:::", postData);
   
         const res = await createPost(postData);
         console.log("...check res:::", res);
 
         if( res && res.data ){
           toast.success("Post created successfully")
-          postEventEmitter.emit('postCreated', res.data);
+          postEventEmitter.emit('postCreated', res.data); //thêm post vừa upload vào đầu danh sách
           handleClose();
-          //thêm post vừa upload vào đầu danh sách
-          
+          setTitle("");
+          setImage([]);
+              
         }
       } catch (error) {
         console.error('Error creating post:', error);

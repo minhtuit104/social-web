@@ -3,11 +3,25 @@ import "../assets/css/modal_notification.css";
 import { useEffect, useRef, useState } from "react";
 import NotificationItem from "./notification_item/Notification_item";
 import fetchNotificationsByIdUser from "../services/NotificationService";
+import 'animate.css';
+import InfiniteScroll from "react-infinite-scroll-component";
 
-const ModalNotification = ({handleClose}: any) => {
+interface ModalNotificationProps {
+    show: boolean;
+    handleClose: () => void;
+    onShowPost: (postData: any) => void; //thêm props mới để xử lý hiển thị post
+}
+
+const ModalNotification: React.FC<ModalNotificationProps> = ({show, handleClose, onShowPost}) => {
     const Ref = useRef<HTMLDivElement>(null);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(false);
     const [notifications, setNotifications] = useState<any[]>([]);
+    const [isClosing, setIsClosing] = useState<boolean>(false);
+    const [page, setPage] = useState<number>(1);
+    const [hasMore, setHasMore] = useState<boolean>(true);
+    const [paginationInfo, setPaginationInfo] = useState<any>(null);
+    // const [selectPost, setSelectPost] = useState<any>(null);
+    // const [showDetailPost, setShowDetailPost] = useState(false);
 
     //hàm giải mã token lấy idUser
     const getUserFromToken = () => {
@@ -32,30 +46,69 @@ const ModalNotification = ({handleClose}: any) => {
     const userInfo = getUserFromToken();
     const idUser = userInfo?.idUser;
 
-    useEffect(() => {
-        const fetchNotifications = async () => {
-            if(idUser){
-                setLoading(true);
-                try {
-                    const data = await fetchNotificationsByIdUser(idUser);
-                    console.log('danh sach thong bao nhan duoc:',data);
-                    setNotifications(data);
-                } catch (error) {
-                    console.error('Error fetching notifications:', error);
-                } finally {
-                    setLoading(false);
-                }
-            }
+
+    const loadNotifications = async () => {
+        if(loading){
+            console.log("Đang tải thông báo...");
+            return;
         };
-        fetchNotifications();
-    }, [idUser]);
-    
+
+        try{
+            setLoading(true);
+            const response = await fetchNotificationsByIdUser(idUser, page);
+
+            if(response && response.data){
+                const { data: { data: newNotifications, pagination } } = response;
+                console.log("Danh sach thong bao:", newNotifications);
+                console.log("Page hiện tại:", page);
+
+                if(page === 1){
+                    console.log('Danh sach thong bao:', newNotifications);
+                    setNotifications(newNotifications);
+                } else {
+                    setNotifications(prevNotifications => [...prevNotifications, ...newNotifications]);
+                }
+                setPaginationInfo(pagination);
+                setHasMore(page < pagination.last_page);
+            }
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadNotifications();
+    }, [idUser, page]);
+
+    const handleCloseWithAnimation = () => {
+        setIsClosing(true);
+        setTimeout(() => {
+            handleClose();
+        }, 500);
+    };
+
+    const handleNotificationClick = (notification: any) => {
+        if(notification.post){
+            const postData = {
+                idPost: notification.post.idPost,
+                title: notification.post.title,
+                privacy: notification.post.privacy,
+                createAt: notification.post.createAt,
+                image: notification.post.image,
+            };
+            onShowPost(postData);
+
+            handleCloseWithAnimation();
+        }
+    }
 
     //hàm đóng modal khi click ra ngoài
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (Ref.current && !Ref.current.contains(event.target as Node)) {
-                handleClose();
+                handleCloseWithAnimation();
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -66,22 +119,45 @@ const ModalNotification = ({handleClose}: any) => {
 
     return (
         <>
-        <div ref={Ref} className="notification">
+        <div 
+            ref={Ref} 
+            className={`notification animate__animated ${
+                isClosing ? 'animate__slideOutRight' : 'animate__slideInRight'}`}>
             <div className="notification-header">
                 <span>Notifications</span>
-                <button onClick={handleClose}><img src={IconClose} alt="close" className="ic-22" /></button>
+                <button onClick={handleCloseWithAnimation}><img src={IconClose} alt="close" className="ic-22" /></button>
             </div>
-            <div className="notification-content">
-                <div className="notification-list">
-                {notifications.map((notification: any) => (
-                    <NotificationItem 
-                    key={notification.id} 
-                    notification={notification} 
-                    />
-                ))}
-                </div>
+            <div className="notification-content" id="scrollableContent">
+                <InfiniteScroll
+                    dataLength={notifications.length}
+                    next={() => {
+                        setTimeout(() => {
+                            setPage(prevPage => prevPage + 1);
+                        }, 1000);
+                    }}
+                    hasMore={hasMore}
+                    scrollThreshold={0.8}
+                    scrollableTarget="scrollableContent"
+                    loader={<div className="loading-indicator" style={{textAlign: 'center'}}>Loading...</div>}
+                    endMessage={<div className="end-message" style={{textAlign: 'center'}}>No more notifications</div>}
+                >
+                    { notifications.length > 0 ? (
+                        <div className="notification-list">
+                            {notifications.map((notification: any) => (
+                                <NotificationItem 
+                                    key={notification.id} 
+                                    notification={notification} 
+                                    onNotificationClick={handleNotificationClick}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="no-notifications">Không có thông báo nào.</div>
+                    )}
+                </InfiniteScroll>
             </div>
         </div>
+
         </>
     );
 };

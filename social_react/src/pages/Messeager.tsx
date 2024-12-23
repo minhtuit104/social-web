@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "../assets/css/messager.css";
 import IconSearch from "../assets/images/icons/ic_search.svg";
 import ChatOnline from "../components/chatOnline/ChatOnline";
 import Conversation from "../components/Conversation/Conversation";
 import Message from "../components/message/Message";
-import NavbarMessager from "../components/navbarMessager/NavbarMessager";
 import { fectchUserName, fetchAllUser } from "../services/UserService";
 import { useWebSocket } from "../WebSocket/WebSocketProvider";
 import { getMessageWithUser } from "../services/MessageService";
+import NavBar from "../layouts/NavBar";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 
 //hàm giải mã lấy idUser
@@ -32,13 +33,18 @@ const getUserFromToken = () => {
 
 
 const Messeager = () => {
-    const socket = useWebSocket();
+    const { socket, isConnected } = useWebSocket();
     const [user, setUser] = useState([]); //khởi tạo danh sách user
     const [selectedUserId, setSelectedUserId] = useState<number | null>(null); //lưu idUser của ngyời nhận
     const [selectedUserInfo, setSelectedUserInfo] = useState<any>(null); //lưu thông tin của người nhận
     const [message, setMessage] = useState<any[]>([]); //lưu message
     const [newMessage, setNewMessage] = useState<string>(''); //lưu message mới
     const [avarta, setAvarta] = useState<string | null>(null);
+    const [page, setPage] = useState<number>(1);
+    const [hasMore, setHasMore] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [paginationInfo, setPaginationInfo] = useState<any>(null);
+   // const chatBoxTopRef = useRef<HTMLDivElement>(null);
 
     const userInfo = getUserFromToken();
     const currentUserId = userInfo?.idUser;
@@ -53,8 +59,9 @@ const Messeager = () => {
         getUser();
     }, [currentUserId]);
 
+    //hàm gửi tin nhắn
     const sendMessage = () => {
-        if(selectedUserId && newMessage.trim() && socket?.connected){
+        if(selectedUserId && newMessage.trim() && isConnected){
             socket?.emit('sendMessage',{
                 receiverId: selectedUserId,
                 content: newMessage
@@ -109,71 +116,126 @@ const Messeager = () => {
                 console.error("No user data not found");
             }
         } catch (error) {
-            console.error('Failed to fetch user name:', error);
+            console.error('Failed to fetch user name:', error)
         }
     };
+
+    //hàm fetch message với pagination
+    const fetchMessages = async (userId1: number, userId2: number, page: number) => {
+        if(!userId1 || !userId2 || loading){
+            console.log('lỗi ở đây...');
+            return;
+        };
+        try {
+            setLoading(true);
+            const res = await getMessageWithUser(userId1, userId2, page);
+            
+            if(res && res.data){
+                const {data: {data: newMessages, pagination}} = res;
+                
+                const updateMessage = newMessages.map((msg: any) => ({
+                    ...msg,
+                    own: msg.sender.idUser === userId1,
+                    time: msg.createAt,
+                    avarta: msg.sender.avarta ?? 'https://www.gravatar.com/avatar/?d=mp',
+                }));
+
+                if(page === 1){
+                    // sắp xếp tin nhắn theo thời gian mới nhất
+                    const sortedMessages = updateMessage.sort((a: any, b: any) => 
+                        new Date(a.time).getTime() - new Date(b.time).getTime()
+                    );
+                    setMessage(sortedMessages);
+                    //setTimeout(scrollToBottom, 100); //scroll xuống tin nhắn mới nhất
+                } else {
+                    setMessage((prevMessages) => {
+                        const allMessages = [...prevMessages, ...updateMessage];
+                        return allMessages.sort((a: any, b: any) => 
+                            new Date(a.time).getTime() - new Date(b.time).getTime()
+                        );
+                    });
+                }
+                setPaginationInfo(pagination);
+                setHasMore(page < pagination.last_page);
+            } else {
+                if(page === 1){
+                    setMessage([]);
+                }
+                setHasMore(false);
+            }
+        } catch (error) {
+            console.error('Failed to fetch messages:', error);
+            setHasMore(false);
+        } finally {
+            setLoading(false);
+        }
+    }
 
     //hàm chọn người nhận
     const handleSelectUserId = async (idUser: number) => {
         setSelectedUserId(idUser);
         console.log("idUser người nhận---------->: ", idUser);
+
+        setPage(1); //reset page về 1 khi chọn người nhận
+        setHasMore(true); //reset có thêm tin nhắn hay không
+        setMessage([]); //reset tin nhắn
         //lấy thông tin người nhận
         const selectUser = user.find((user: any) => user.idUser === idUser);
         setSelectedUserInfo(selectUser);
-        try {
-            const res = await getMessageWithUser(currentUserId, idUser);
-            // console.log("res---------->: ", res?.data);
-            if(res && res.data && res.data.length > 0){
-                const updateMessage = res.data.map((msg: any) => ({
-                    ...msg,
-                    own: msg.sender.idUser === currentUserId,
-                    time: msg.createAt,
-                    avarta: msg.sender.avarta ?? 'https://www.gravatar.com/avatar/?d=mp',
-                }));
-                setMessage(updateMessage);
-                // console.log("message với người nhận---->: ", updateMessage);
-            } else {
-                setMessage([]);
+
+        if(currentUserId){
+            try {
+                await fetchMessages(currentUserId, idUser, 1);
+            } catch (error) {
+                console.error('Failed to fetch message:', error);
             }
-        } catch (error) {
-            console.error('Failed to fetch message:', error);
         }
     };
+
+    useEffect(() => {
+        if(currentUserId && selectedUserId && page > 1){
+            fetchMessages(currentUserId, selectedUserId, page);
+        }
+    }, [page, currentUserId, selectedUserId]);
     
 
   return (<>
-    <NavbarMessager />
     <div className="messager">
-        <div className="chatMenu">
-            <div className="chatMenuWrapper">
-                <img src={IconSearch} alt="" className="ic-22 ic-search" />
-                <input type="text" placeholder="Search for friends" className="chatMenuInput" />
-                {/* Map qua danh sách user và render Conversation */}
-                {user.map((user: any) => (
-                    <Conversation 
-                    key={user.idUser} 
-                    user={user} 
-                    onClick={() => handleSelectUserId(user.idUser)}
-                    isSelected={selectedUserId === user.idUser} /> //kiểm tra xem user có được chọn hay không
-                ))}
-            </div>
-        </div>
+        <NavBar />
         <div className="chatBox">
             <div className="chatBoxWrapper">
-                <div className="chatBoxTop">
-                    {Array.isArray(message) && message.length > 0 ? (
-                        message.map((msg, index) => (
-                            <Message 
-                                key={index} 
-                                own={msg.own} 
-                                content={msg.content} 
-                                avarta={msg.avarta ?? 'https://www.gravatar.com/avatar/?d=mp'} 
-                                time={msg.time}
-                            />
-                    ))
-                ): (
-                    <p>No messages</p>
-                )}
+                <div className="chatBoxTop" id="chatBoxTop">
+                    <InfiniteScroll
+                        dataLength={message.length}
+                        next={() => {
+                            if(!loading && hasMore){
+                                setTimeout(() => {
+                                    setPage(prevPage => prevPage + 1);
+                                }, 1000);
+                            }
+                        }}
+                        hasMore={hasMore}
+                        loader={<p style={{textAlign: 'center'}}>Loading...</p>}
+                        inverse={true}
+                        scrollableTarget="chatBoxTop"
+                        style={{ display: 'flex', flexDirection: 'column-reverse' }} 
+                        //height={window.innerHeight - 200}
+
+                    >
+                        {Array.isArray(message) && message.length > 0 ? (
+                            [...message].reverse().map((msg, index) => (
+                                <Message 
+                                    key={`msg-${index}`} 
+                                    own={msg.own} 
+                                    content={msg.content} 
+                                    avarta={msg.avarta ?? 'https://www.gravatar.com/avatar/?d=mp'} 
+                                    time={msg.time}
+                                />
+                            ))
+                        ): (
+                            <p>No messages</p>
+                        )}
+                    </InfiniteScroll>
                 </div>
                 <div className="chatBoxBottom">
                     <textarea 
@@ -193,6 +255,20 @@ const Messeager = () => {
                         avarta={selectedUserInfo.avarta ?? 'https://www.gravatar.com/avatar/?d=mp'} 
                     />
                 )}
+            </div>
+        </div>
+        <div className="chatMenu">
+            <div className="chatMenuWrapper">
+                <img src={IconSearch} alt="" className="ic-22 ic-search" />
+                <input type="text" placeholder="Search for friends" className="chatMenuInput" />
+                {/* Map qua danh sách user và render Conversation */}
+                {user.map((user: any) => (
+                    <Conversation 
+                    key={user.idUser} 
+                    user={user} 
+                    onClick={() => handleSelectUserId(user.idUser)}
+                    isSelected={selectedUserId === user.idUser} /> //kiểm tra xem user có được chọn hay không
+                ))}
             </div>
         </div>
     </div>

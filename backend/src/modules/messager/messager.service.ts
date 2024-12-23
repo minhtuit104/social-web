@@ -3,6 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Messager } from "../../typeorm/entities/Messager";
 import { User } from "src/typeorm/entities/User";
+import { PaginatedResponse } from "../pagination/pagination.interface";
 
 @Injectable()
 export class MessagerService {
@@ -14,20 +15,30 @@ export class MessagerService {
     ) {}
 
     // Lấy tất cả các tin nhắn giữa hai người dùng
-    async getMessagesBetweenUsers(userId1: number, userId2: number): Promise<Messager[]> {
-        const messager = await this.messagerRepository.find({
+    async getMessagesBetweenUsers(userId1: number, userId2: number, page: number = 1, pageSize: number = 10): Promise<PaginatedResponse<Messager>> {
+        const [messager, total] = await this.messagerRepository.findAndCount({
           where: [
             { sender: { idUser: userId1 }, receiver: { idUser: userId2 } },
             { sender: { idUser: userId2 }, receiver: { idUser: userId1 } },
           ],
           relations: ['sender', 'receiver'], // Quan hệ với bảng user
-          order: { createAt: 'ASC' },
+          order: { createAt: 'DESC' },
+          skip: (page - 1) * pageSize,
+          take: pageSize,
         });
 
         if(!messager.length){
             throw new NotFoundException('No messages found between users');
         }
-        return messager;
+        return {
+            data: messager,
+            pagination: {
+                total,
+                last_page: Math.ceil(total / pageSize),
+                pageSize,
+                page
+            }
+        };
     }
 
     // Tạo mới một tin nhắn

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, Response, Req } from "@nestjs/common";
+import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, Response, Req, Query, ParseIntPipe } from "@nestjs/common";
 import { MessagerService } from "./messager.service";
 import { JwtAuthGuard } from "../auth/jwtAuthGuard/jwtAuthGuard";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
@@ -16,23 +16,27 @@ export class MessagerController {
         async getMessagesBetweenUsers(
           @Param('userId2') userId2: number, 
           @Response() res, 
-          @Req() req: Request
+          @Req() req: Request,
+          @Query('page', ParseIntPipe) page: number = 1,
+          @Query('pageSize', ParseIntPipe) pageSize: number = 10
         ) {
           const user = req['user'];
           const userId1 = user.idUser;
 
           try {
-            const messages = await this.messagerService.getMessagesBetweenUsers(userId1, userId2);
+            const result = await this.messagerService.getMessagesBetweenUsers(userId1, userId2, page, pageSize);
             return res.status(200).json({
-            status: 'success',
-            message: 'Messages retrieved successfully',
-            data: messages,
-          });
-        } catch (error) {
-          return res.status(500).json({
-            status: 'error',
-            message: 'Failed to retrieve messages',
-            error: error.message,
+              code: 200,
+              success: true,
+              message: 'SUCCESS',
+              data: result
+            });
+          } catch (error) {
+            return res.status(500).json({
+              code: 500,
+              success: false,
+              message: 'FAILED',
+              error: error.message,
           });
         }
         }

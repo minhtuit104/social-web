@@ -1,0 +1,93 @@
+@import url(../../assets/css/styles.css);
+
+.friend-request-item{
+    animation: fadeIn 0.3s ease-in;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    background-color: var(--grey5);
+}
+.friend-request-item.removing {
+    animation: fadeOut 0.5s ease-out forwards;
+}
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+.Avatar img{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.Info{
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    margin-left: 5px;
+}
+.Info .Name{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.Info .Name .name{
+    font-size: 16px;
+    font-weight: 600;
+}
+.Info .Name .createdAt{
+    font-size: 12px;
+    color: var(--black8);
+}
+.Info .Button{
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+}
+button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.accept-button{
+    background-color: var(--blue1);
+    border-radius: 5px;
+    font-size: 14px;
+    padding: 0 9px;
+    border: none;
+    color: var(--white1);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.decline-button{
+    background-color: var(--black7);
+    border-radius: 5px;
+    font-size: 14px;
+    padding: 0 9px;
+    border: none;
+    color: var(--white1);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+
+

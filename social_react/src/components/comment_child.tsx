@@ -16,16 +16,16 @@ const CommentChild = ({author, subcomment, createdAt, avatar }: CommentChildProp
             <div className="comment-child-header">
                 <img src={avatar} alt={author}/>
                 <div className="comment-info">
-                    <h3>{author}</h3>
-                    <span>{formatDistanceToNow(new Date(createdAt), { addSuffix: true })}</span>
+                    <span className="nameinfo">{author}</span>
+                    <span className="time-cmt">{formatDistanceToNow(new Date(createdAt), { addSuffix: true })}</span>
                 </div>
             </div>
             <div className="comment-content">
                 <p>{subcomment}</p>                
             </div>
             <div className="comment-footer">
-                <button>Like</button>
-                <button>Reply</button>
+                {/* <button>Like</button>
+                <button>Reply</button> */}
             </div>                
         </div>
     </>)

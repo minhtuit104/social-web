@@ -1,0 +1,129 @@
+@import url(../../assets/css/styles.css);
+
+.modal-update-avatar{
+    
+    .modal-title.h4 {
+        font-size: 20px;
+        font-weight: 600;
+    }
+    
+    .modal-avatar-body{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .modal-avatar{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .modal-avatar img{
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    
+    .modal-avatar span{
+        font-size: 16px;
+        font-weight: 600;
+    }
+    
+    .modal-avatar-actions-newAvatar{
+        display: flex;
+        flex-direction: column;
+        width: 70%;
+        align-items: center;
+        margin-right: 15px;
+        margin-top: 20px;
+    }
+    
+    .modal-avatar-actions-newAvatar button{
+        width: 150px;
+        border-radius: 8px;
+        border: none;
+        background-color: var(--grey5);
+        color: var(--black1);
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+    }
+    
+    .modal-avatar-actions button:hover{
+        background-color: var(--mint2);
+    }
+    
+    
+    .image-preview{
+        display: flex;
+        justify-content: center;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
+    
+    .show-image{
+        position: relative;
+        width: 300px;
+        height: 300px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        flex: 0 0 auto;
+        background-color: rgba(174, 174, 174, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+    }
+    
+    .show-image img{
+        border-radius: 50%;
+        width: 95%;
+        height: 95%;
+        object-fit: cover;
+    }
+    
+    .show-image button:hover{
+        background-color: var(--grey1);
+    }
+    
+    .show-image button{
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        color: var(--black1);
+        border: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background-color: var(--grey5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-footer button[disabled=disabled], button:disabled {
+        cursor: not-allowed;
+    }
+    
+    .modal-footer button{
+        background-color: var(--blue2);
+        color: var(--white1);
+        border: none;
+        border-radius: 8px;
+        padding: 5px 15px;
+    }
+    
+    .updating{
+        background-color: var(--blue1);
+        color: var(--white1);
+    }
+}
+
+.modal-update-avatar .modal-content{
+    width: 630px !important;
+    height: auto !important;
+}
+

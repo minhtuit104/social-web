@@ -7,6 +7,7 @@ import { UpdateCommentDto } from "./dto/update.dto";
 import { CreateCommentDto } from "./dto/create.dto";
 import { Post } from "src/typeorm/entities/Post";
 import { User } from "src/typeorm/entities/User";
+import { PaginatedResponse } from "../pagination/pagination.interface";
 
 @Injectable()
 export class CommentService{
@@ -17,10 +18,23 @@ export class CommentService{
         @InjectRepository(User) private usersRepository: Repository<User>,
     ) {}
 
-    async findAll(){
-        return await this.commentRepository.find({
-            relations: ['user']
+    async findAll(page: number = 1, pageSize: number = 10): Promise<PaginatedResponse<Comment>>{
+        const [comments, total] = await this.commentRepository.findAndCount({
+            relations: ['user'],
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+            order: {idComment: 'DESC'}
         });
+
+        return {
+            data: comments,
+            pagination: {
+                total, 
+                last_page: Math.ceil(total / pageSize), 
+                pageSize, 
+                page
+            }
+        };
     }
 
 
@@ -101,15 +115,27 @@ export class CommentService{
         }
     }
 
-    async getCommentsByPost(idPost: number){
-        const comment = await this.commentRepository.find({
+    async getCommentsByPost(idPost: number, page: number = 1, pageSize: number = 6): Promise<PaginatedResponse<Comment>> {
+        const [comments, total] = await this.commentRepository.findAndCount({
             where: {post: {idPost: idPost}},
             relations: ['subComments','subComments.user', 'user'],
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+            order: {idComment: 'DESC'}
         });
 
-        if(!comment){
+        if(!comments){
             throw new Error('Comment not found');
         }
-        return plainToInstance(Comment, comment);
+        
+        return {
+            data: comments,
+            pagination: {
+                total, 
+                last_page: Math.ceil(total / pageSize), 
+                pageSize, 
+                page
+            }
+        };
     }
 }

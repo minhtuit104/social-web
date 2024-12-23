@@ -17,6 +17,7 @@
   
   .chat-notification.open {
     display: flex;
+    z-index: 1000;
   }
   
   .chat-header {
@@ -33,23 +34,53 @@
   .chatHeaderWrapper {
     display: flex;
     align-items: center;
+    gap: 10px;
+
   }
   
   .user-avatar {
-    width: 35px;
-    height: 35px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    margin-right: 10px;
+    margin-right: 6px;
+    object-fit: cover;
+    border: 2px solid var(--grey1);
   }
 
   .chat-body {
-    flex: 1;
-    padding: 10px;
-    overflow-y: auto;
+    padding: 10px 3px 10px 10px;
+    overflow: hidden;
+    height: 292px;
     /* display: flex;
     flex-direction: column; */
   }
+
+  .chatBodyWapper {
+    height: 100%;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    display: flex;
+    flex-direction: column-reverse;
+  }
   
+  .chatBodyWapper .infinite-scroll-component {
+    display: flex;
+    flex-direction: column-reverse !important;
+    overflow-x: hidden !important;
+  }
+
+  .chatBodyWapper::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .chatBodyWapper::-webkit-scrollbar-track {
+    background-color: #f1f1f1;
+  }
+
+  .chatBodyWapper::-webkit-scrollbar-thumb {
+    background-color: rgb(179, 179, 179);
+  }
+
   .chat-message {
     margin-bottom: 10px;
   }
@@ -84,14 +115,14 @@
     border-radius: 5px;
   }
   
-  .close-btn {
+  .close-modal {
     background-color: transparent;
     border: none;
     color: white;
     cursor: pointer;
   }
    
-  .close-btn img {
+  .close-modal img {
     width: 28px;
     height: 28px;
     filter: brightness(0) invert(1);

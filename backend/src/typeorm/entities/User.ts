@@ -6,6 +6,8 @@ import { SubComment } from "./SubComment";
 import { Messager } from "./Messager";
 import { Notification } from "./Notification";
 import { Emotion } from "./Emotion";
+import { Friend } from "./Friend";
+import { Story } from "./Story";
 //tên bảng
 @Entity({ name: 'user'})
 export class User {
@@ -57,4 +59,13 @@ export class User {
 
     @OneToMany(() => Notification, (notification) => notification.receiver)
     notifications: Notification[];
+
+    @OneToMany(() => Friend, (friend) => friend.user)
+    sentFriendRequests: Friend[];
+
+    @OneToMany(() => Friend, (friend) => friend.friend)
+    receivedFriendRequests: Friend[];
+
+    @OneToMany(() => Story, (story) => story.authorId)
+    stories: Story[];
 }

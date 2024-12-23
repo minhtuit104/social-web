@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards,Response  } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards,Response, Req, HttpException  } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { CreateUserDto } from "./dtos/create.dto";
 import { UpdateUserDto } from "./dtos/update.dto";
 import {JwtAuthGuard} from "../auth/jwtAuthGuard/jwtAuthGuard";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { UpdateAvatarDto } from "./dtos/updateAvatar.dto";
 
 @ApiBearerAuth()
 @ApiTags('Users')
@@ -48,9 +49,61 @@ export class UserController{
         return this.userService.create(createUserDto);
     }
 
-    @Put('/:id')
+    //cập nhật thông tin cá nhân
+    @Put('/update-profile')
     @UseGuards(JwtAuthGuard)
-    update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto){
-        return this.userService.update(id, updateUserDto);
+    async updateProfile(@Body() updateUserDto: UpdateUserDto, @Req() req: Request, @Response() res) {
+        try {
+            const user = req['user'];
+            const idUser = user.idUser;
+            const updatedUser = await this.userService.update(idUser, updateUserDto);
+            
+            return res.status(200).json({
+                status: 'success',
+                message: 'update profile success',
+                data: updatedUser,
+            }); 
+        } catch (error) {
+            if (error instanceof HttpException) {
+                return res.status(error.getStatus()).json({
+                    status: 'error',
+                    message: error.message,
+                });
+            }
+
+            return res.status(500).json({
+                status: 'error',
+                message: 'Internal server error while updating profile',
+            });
+        }
+    }
+    
+
+    @Put('/update-avatar')
+    @UseGuards(JwtAuthGuard)
+    async updateAvatar(@Body() updateAvatarDto: UpdateAvatarDto, @Req() req: Request, @Response() res){
+        try{
+            const user = req['user'];
+            const idUser = user.idUser;
+            const userUpdate = await this.userService.updateAvatar(idUser, updateAvatarDto);
+            return res.status(200).json({
+                status: 'success',
+                message: 'update avatar success',
+                data: userUpdate.avarta,
+            });
+        } catch (error) {
+            // Xử lý các loại lỗi khác nhau
+            if (error instanceof HttpException) {
+                return res.status(error.getStatus()).json({
+                    status: 'error',
+                    message: error.message,
+                });
+            }
+
+            return res.status(500).json({
+                status: 'error',
+                message: 'Internal server error while updating avatar',
+            });
+        }
     }
 }

@@ -1,4 +1,4 @@
-import Avartar from "../assets/images/tu.jpg";
+
 import IconNew from "../assets/images/icons/ic_news.svg";
 import IconMessage from "../assets/images/icons/ic_message.svg";
 import IconFriend from "../assets/images/icons/ic_friends.svg";
@@ -11,22 +11,74 @@ import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 import { fectchUserName } from "../services/UserService";
 import ModalNotification from "../components/modal_notification";
+import ModalFriends from "../components/modalFriends/modal_friends";
+import { useUser } from "../components/UserContext/UserContext";
+import { useWebSocket } from "../WebSocket/WebSocketProvider";
+import ModalDetailPost from "../components/modal_detail_post/Modal_detail_post";
 
 const NavBar = () => {
-
+    const { userAvatar, userNewName, userNewEmail } = useUser();
     const location = useLocation();
     const [activeTab, setActiveTab] = useState('');
     const [userName, setUserName] = useState<string | null>(null);
     const [emailInfo, setEmailInfo] = useState<string | null>(null);
     const [avarta, setAvarta] = useState<string | null>(null);
-    const [notifications, setNotifications] = useState<any[]>([]);//danh sách thông báo
     const [showModalNotification, setShowModalNotification] = useState(false);//hiển thị modal thông báo
+    const [showModalFriends, setShowModalFriends] = useState(false);//hiển thị modal bạn bè
+    const { socket, isConnected } = useWebSocket();
+    const [messageCount, setMessageCount] = useState(0);
+    const [notificationCount, setNotificationCount] = useState(0);
+    const [friendRequestCount, setFriendRequestCount] = useState(0);
+    const [showDetailPost, setShowDetailPost] = useState(false);
+    const [selectedPost, setSelectedPost] = useState<any>(null);
 
+    
+    useEffect(() => {
+        if(socket && isConnected){
+            // socket.on('receiveMessage', (data) => {
+            //     setMessageCount(prevCount => prevCount + 1);
+            // }); 
+            socket.on('receiveNewComment', (data) => {
+                setNotificationCount(prevCount => prevCount + 1);
+            });
+            socket.on('receiveNewEmotion', (data) => {
+                setNotificationCount(prevCount => prevCount + 1);
+            });
+            socket.on('receiveFriendRequest', (data) => {
+                setFriendRequestCount(prevCount => prevCount + 1);
+            });
+        }
+
+        return () => {
+            if(socket){
+                //socket.off('receiveMessage');
+                socket.off('receiveNewComment');
+                socket.off('receiveNewEmotion');
+                socket.off('receiveFriendRequest');
+            }
+        }
+    }, [socket, isConnected]);
+
+    
+    const toggleModalFriends = () => {
+        setShowModalFriends(!showModalFriends);
+        //Reset lại số lượng bạn bè khi mở modal
+        if(!showModalFriends){
+            setFriendRequestCount(0);
+        }
+    }
+    const handleShowPost = (postData: any) => {
+        setSelectedPost(postData);
+        setShowDetailPost(true);
+    }
     //hàm hiển thị đóng mở modal thông báo
     const toggleModalNotification = () => {
         setShowModalNotification(!showModalNotification);
+        //Reset lại số lượng thông báo khi mở modal
+        if(!showModalNotification){
+            setNotificationCount(0);
+        }
     }
-
 
     //hàm giải mã token
     const getUserFromToken = () => {
@@ -75,34 +127,53 @@ const NavBar = () => {
         if(location.pathname === "/home"){
             setActiveTab("new-feed");
         }
+        if(location.pathname === "/home/messager"){
+            setActiveTab("message");
+        }
     }, [location]);
 
     const navigate = useNavigate();
     const handleLogout = () => {
         localStorage.removeItem("token");
-        navigate("/");
+        window.location.href = "/";
         toast.success("Logout success!")
+    }
+    const handleProfile = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+        event.preventDefault();
+        navigate(`/profile/${idUser}`);
+    }
+    const handleMessage = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+        event.preventDefault();
+        //Reset lại số lượng tin nhắn khi chuyển đến trang messager
+        setMessageCount(0);
+        navigate("/home/messager");
     }
 
     return (<>
     <div className="nav-side-bar">
         <div className="profile">
             <div className="profile-image">
-                <img src={avarta ?? 'https://www.gravatar.com/avatar/?d=mp' } alt="Profile Image" />
+                <a href="/home/profile" onClick={handleProfile}><img src={userAvatar ?? avarta ?? 'https://www.gravatar.com/avatar/?d=mp' } alt="Profile Image" /></a>
             </div>
-            <h3>{userName ?? 'Loading...'}</h3>
-            <p>{emailInfo ?? 'Loading...'}</p>
+            <h3>{userNewName ?? userName ?? 'Loading...'}</h3>
+            <p>{userNewEmail ?? emailInfo ?? 'Loading...'}</p>
         </div>
         <nav>
             <ul>
                 <li className={activeTab === "new-feed" ? "active" : ""}><a href="/home"><img src={IconNew} alt="" className="ic-22" />News Feed</a></li>
-                <li><a href="/home/messager"><img src= {IconMessage} alt="" className="ic-22" />Messages</a><span className="quantity">9</span></li>
-                <li><a href="/friends"><img src= {IconFriend} alt="" className="ic-22" />Friends</a><span className="quantity">9</span></li>
-                <li><a href="#" onClick={toggleModalNotification}><img src= {IconNotting} alt="" className="ic-22" />Notifications</a><span className="quantity">9</span></li>
+                <li className={activeTab === "message" ? "active" : ""}><a href="/home/messager" onClick={handleMessage}><img src= {IconMessage} alt="" className="ic-22" />Messages</a>
+                    {messageCount > 0 && <span className="quantity">{messageCount}</span>}
+                </li>
+                <li><a href="#" onClick={toggleModalFriends}><img src= {IconFriend} alt="" className="ic-22" />Friends</a>
+                    {friendRequestCount > 0 && <span className="quantity">{friendRequestCount}</span>}
+                </li>
+                <li><a href="#" onClick={toggleModalNotification}><img src= {IconNotting} alt="" className="ic-22" />Notifications</a>
+                    {notificationCount > 0 && <span className="quantity">{notificationCount}</span>}
+                </li>
                 <li>
                     <img src= {IconSetting} className="ic-22 icSetting" alt="Settings" />
                     <NavDropdown title="Settings" className="DropdownSetting" style={{marginLeft: '-13px'}}>
-                        <NavDropdown.Item href="/profile">Profile</NavDropdown.Item>
+                        <NavDropdown.Item href="#" onClick={handleProfile}>Profile</NavDropdown.Item>
                         <NavDropdown.Item onClick={() => handleLogout()}>Logout</NavDropdown.Item>
                     </NavDropdown>
                 </li>
@@ -113,7 +184,26 @@ const NavBar = () => {
     {showModalNotification && (
         <ModalNotification 
         show={showModalNotification} 
-        handleClose={toggleModalNotification} />
+        handleClose={() => setShowModalNotification(false)}
+        onShowPost={handleShowPost}/>
+    )}
+    {showModalFriends && (
+        <ModalFriends 
+        show={showModalFriends} 
+        handleClose={toggleModalFriends} />
+    )}
+
+    {selectedPost && (
+        <ModalDetailPost 
+            show={showDetailPost}
+            handleClose={() => {setShowDetailPost(false); setSelectedPost(null);}}
+            idPost={selectedPost.idPost}
+            title={selectedPost.title}
+            privacy={selectedPost.privacy}
+            createAt={selectedPost.createAt}
+            image={selectedPost.image}
+            updateCommentCount={() => {}}
+        />
     )}
     </>);
 }

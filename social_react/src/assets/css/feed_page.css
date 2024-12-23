@@ -1,6 +1,13 @@
 .content{
     width: 55%;
+    height: 100vh;
     padding: 0 10px 0 10px;
-    flex: 1;
     overflow-y: auto;
+    position: relative;
+}
+
+.content-container{
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 10px 0 10px;
 }
